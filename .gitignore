@@ -1,0 +1,6 @@
+# Exclude temporary local secrets dir except README
+!infrastructure/secrets/tmp_local_secrets
+!infrastructure/secrets/tmp_local_secrets/README.md
+infrastructure/secrets/tmp_local_secrets/*
+
+
