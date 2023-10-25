@@ -3,6 +3,7 @@
 # Once the certificates have been split, provide their path to be read when creating the secrets (NEEDS TO BE EXCLUDED FROM COMMITS!!):
 RAW_SECRETS_DAEMONS="/root/clusters_CERTS/cern-vre-dev/daemons-dev"
 RAW_SECRETS_BUNDLE="/root/clusters_CERTS/cern-vre-dev/daemons-dev/ca-bundle_files/"
+RAW_SECRETS_FTS="/root/clusters_CERTS/cern-vre-dev/daemons-dev/fts-robot-cert"
 
 # kubeseal controller namespace
 CONTROLLER_NS="sealed-secrets"
@@ -31,6 +32,18 @@ mkdir -p ${RAW_SECRETS_BUNDLE}
 cp /etc/grid-security/certificates/*.0 ${RAW_SECRETS_BUNDLE}
 cp /etc/grid-security/certificates/*.signing_policy ${RAW_SECRETS_BUNDLE}
 
-# kubeseal has problems with secretsthis large, so it needs to be created manually and not applied with kubeseal
+# # kubeseal has problems with secretsthis large, so it needs to be created manually and not applied with kubeseal
 kubectl create secret generic ${HELM_RELEASE_DAEMONS}-rucio-ca-bundle --from-file=${RAW_SECRETS_BUNDLE} --namespace=${RUCIO_NS}
 kubectl create secret generic ${HELM_RELEASE_DAEMONS}-rucio-ca-bundle-reaper --from-file=${RAW_SECRETS_BUNDLE} --namespace=${RUCIO_NS} # kubeseal has problems with secretsthis large, so it needs to be created manually
+
+# FTS secrets from ewp2c01 Robot certificate
+
+kubectl create secret generic ${HELM_RELEASE_DAEMONS}-fts-cert --dry-run=client --from-file=${RAW_SECRETS_FTS}/ewp2c01-cert.pem -o yaml | \
+kubeseal --controller-name=${CONTROLLER_NAME} --controller-namespace=${CONTROLLER_NS} --format yaml --namespace=${RUCIO_NS} > ${SECRETS_STORE}/ss_${HELM_RELEASE_DAEMONS}-fts-cert.yaml
+
+kubectl apply -f ${SECRETS_STORE}/ss_${HELM_RELEASE_DAEMONS}-fts-cert.yaml
+
+kubectl create secret generic ${HELM_RELEASE_DAEMONS}-fts-key --dry-run=client --from-file=${RAW_SECRETS_FTS}/ewp2c01-key.pem -o yaml | \
+kubeseal --controller-name=${CONTROLLER_NAME} --controller-namespace=${CONTROLLER_NS} --format yaml --namespace=${RUCIO_NS} > ${SECRETS_STORE}/ss_${HELM_RELEASE_DAEMONS}-fts-key.yaml
+
+kubectl apply -f ${SECRETS_STORE}/ss_${HELM_RELEASE_DAEMONS}-fts-key.yaml
