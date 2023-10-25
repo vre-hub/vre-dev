@@ -35,6 +35,7 @@ kubeseal --controller-name=${CONTROLLER_NAME} --controller-namespace=${CONTROLLE
 
 kubectl apply -f ${SECRETS_STORE}/ss_${HELM_RELEASE_SERVER}-server-hostkey.yaml
 
+# The content of this file is the same as in /etc/pki/tls/certs/ca.pem but renamed.
 kubectl create secret generic ${HELM_RELEASE_SERVER}-server-cafile --dry-run=client --from-file=${RAW_SECRETS_SERVERS}/ca.pem -o yaml | \
 kubeseal --controller-name=${CONTROLLER_NAME} --controller-namespace=${CONTROLLER_NS} --format yaml --namespace=${RUCIO_NS} > ${SECRETS_STORE}/ss_${HELM_RELEASE_SERVER}-server-cafile.yaml
 
