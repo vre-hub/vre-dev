@@ -49,7 +49,6 @@ spec:
     image:
       repository: rucio/rucio-ui
       tag: release-32.0.0
-      tag: release-32.0.0
       pullPolicy: Always
 
     strategy:
