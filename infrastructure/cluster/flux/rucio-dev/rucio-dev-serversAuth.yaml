@@ -91,7 +91,6 @@ spec:
       selectorLabel: "'release in (servers-auth-dev),app in (rucio-dev)'"
 
     httpd_config:
-    httpd_config:
       mpm_mode: "event"
       timeout: "300"
       enable_status: "True"
@@ -108,7 +107,7 @@ spec:
       max_request_workers: "1280"
       max_connections_per_child: "2048"
       max_clients: "20"
-      mpm_mode: "worker"
+      # mpm_mode: "worker"
 
     ## values used to configure Rucio
     config:
