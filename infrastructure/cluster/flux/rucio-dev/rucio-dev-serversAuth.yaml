@@ -41,7 +41,7 @@ spec:
       # - name: RUCIO_CA_PATH
       #   value: "/etc/grid-security/certificates"
       - name: RUCIO_SSL_PROTOCOL
-        value: "all -SSLv3 -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3"
+        value: "-SSLv3 -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3"
       # - name: RUCIO_HTTPD_PROXY_PROTOCOL_EXCEPTIONS
       #   valueFrom:
       #     fieldRef:
