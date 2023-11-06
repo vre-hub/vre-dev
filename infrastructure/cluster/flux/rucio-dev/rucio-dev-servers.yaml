@@ -106,7 +106,7 @@ spec:
       max_request_workers: "1280"
       max_connections_per_child: "2048"
       max_clients: "20"
-      mpm_mode: "worker"
+      # mpm_mode: "worker"
 
     ## values used to configure Rucio
     config:
