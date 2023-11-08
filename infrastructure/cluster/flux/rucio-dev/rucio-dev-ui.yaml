@@ -45,6 +45,8 @@ spec:
       targetPort: 443
       protocol: TCP
       name: https
+      annotations:
+        service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
       
     image:
       repository: rucio/rucio-ui
