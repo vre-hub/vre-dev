@@ -3,7 +3,7 @@ ARG BASETAG=release-32.0.0
 ARG BUILD_DATE
 
 FROM $BASEIMAGE:$BASETAG
-LABEL maintainer="VRE Team @ CERN 22/23 - E. Garcia, E. Gazzarrini, D. Gosein"
+LABEL maintainer="VRE Team - DEV image"
 LABEL org.opencontainers.image.source https://github.com/vre-hub/vre
 LABEL org.label-schema.build-date=$BUILD_DATE
 
@@ -42,3 +42,5 @@ USER user
 WORKDIR /home/user
 
 ENTRYPOINT ["/bin/bash"]
+
+
