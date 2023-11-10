@@ -25,6 +25,9 @@ RUN curl -Lo /etc/yum.repos.d/egi-trustanchors.repo https://repository.egi.eu/sw
 RUN yum -y install gfal2* python3-gfal2 xrootd-client voms-clients-java 
 RUN yum -y install ca-certificates ca-policy-egi-core
 
+RUN pwd
+RUN ls -lrt
+
 # Install CERN CA certs from CERN maintained mirrors
 # This will add a `CERN-bundle.pem` file (among others) into `/etc/pki/tls/certs/`
 COPY ./linuxsupport7s-stable.repo /etc/yum.repos.d/
