@@ -23,12 +23,18 @@ spec:
       targetPath: config.database.default
 
   values:
-  #   additionalSecrets:
-  #     - volumeName: idpsecrets
-  #       secretName: idpsecrets
-  #       mountPath: /opt/rucio/etc/idpsecrets.json
-  #       subPath: idpsecrets.json
 
+    secretMounts:
+      - secretName: hostcert
+        mountPath: /etc/grid-security/hostcert.pem
+        subPath: hostcert.pem
+      - secretName: hostkey
+        mountPath: /etc/grid-security/hostkey.pem
+        subPath: hostkey.pem
+      - secretName: cafile
+        mountPath: /etc/grid-security/ca.pem
+        subPath: ca.pem
+        
     replicaCount: 1
     exposeErrorLogs: True
 
