@@ -30,7 +30,7 @@ RUN ls -lrt
 
 # Install CERN CA certs from CERN maintained mirrors
 # This will add a `CERN-bundle.pem` file (among others) into `/etc/pki/tls/certs/`
-COPY ./linuxsupport7s-stable.repo /etc/yum.repos.d/
+COPY linuxsupport7s-stable.repo /etc/yum.repos.d/
 RUN yum install -y CERN-CA-certs
 
 # ESCAPE VOMS setup
@@ -46,7 +46,7 @@ RUN chmod +x /usr/bin/kubectl
 WORKDIR /home
 
 COPY produce_noise.sh requirements.txt rses.txt /home/
-RUN chmod +x ./produce_noise.sh
+RUN chmod +x produce_noise.sh
 RUN pip install -r /home/requirements.txt
 
 ENTRYPOINT ["/bin/bash"]
