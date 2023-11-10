@@ -28,6 +28,7 @@ jobs:
           'rucio-client',
           'rucio-noise'
         ]
+      fail-fast: false
 
     steps:
       - name: Checkout repository
@@ -55,7 +56,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v4.0.0
         with:
-          context: containers/${{ matrix.context }}
+          context: ./containers/${{ matrix.context }}
           file: containers/${{ matrix.context }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
