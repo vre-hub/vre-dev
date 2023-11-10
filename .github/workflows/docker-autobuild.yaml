@@ -1,0 +1,62 @@
+name: Docker auto build - VRE DEV
+
+on:
+  push:
+    paths:
+      - containers/**
+    tags:
+      - '**'
+
+env:
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    # permissions:
+    # contents: read
+    # packages: write
+    # # This is used to complete the identity challenge
+    # # with sigstore/fulcio when running outside of PRs.
+    # id-token: write
+    strategy:
+      matrix:
+        context: [
+          'rucio-client',
+          'rucio-noise'
+        ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the GH Container Registry - ${{ env.REGISTRY }}
+        id: login
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata for ${{ matrix.context }}
+        id: meta
+        uses: docker/metadata-action@v4.3.0
+        with:
+          flavor: |
+            latest=true
+          tags: |
+            type=sha
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.context }}
+
+      - name: Build and push ${{ matrix.context }}
+        id: build-and-push
+        uses: docker/build-push-action@v4.0.0
+        with:
+          context: ./${{ matrix.context }}
+          file: ./${{ matrix.context }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: | 
+            BUILD_DATE=$(date +'%Y-%m-%dT%H:%M:%SZ')    
