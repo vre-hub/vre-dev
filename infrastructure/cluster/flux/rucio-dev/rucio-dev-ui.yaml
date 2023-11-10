@@ -39,12 +39,21 @@ spec:
     #   targetPort: https
     #   portName: https
     service:
+      # type: LoadBalancer
+      # useSSL: true
+      # port: 443
+      # targetPort: 443
+      # protocol: TCP
+      # name: https
+      # annotations:
+      #   service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
+
       type: LoadBalancer
-      useSSL: true
-      port: 443
-      targetPort: 443
+      useSSL: false
+      port: 80
+      targetPort: 80
       protocol: TCP
-      name: https
+      name: http
       annotations:
         service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
       
@@ -86,8 +95,10 @@ spec:
       database: []
         
       policy:
-        permission: "generic"
-        schema: "generic"
+        # permission: "generic"
+        # schema: "generic"
+        permission: "escape"
+        schema: "escape"
         lfn2pfn_algorithm_default: "identity"
 
       # oidc:
