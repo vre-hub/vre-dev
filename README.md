@@ -1,2 +1,2 @@
 # vre-dev
-Dev VRE instance for testing putposes
+Dev VRE instance for testing purposes
