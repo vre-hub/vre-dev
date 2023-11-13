@@ -34,10 +34,10 @@ RUN mkdir -p /etc/grid-security/vomsdir/escape \
 ADD --chown=user:user rucio.cfg.escape.j2 /opt/user/rucio.cfg.j2
 
 # install reana-client 
-ENV LC_ALL=en_US.UTF-8
-RUN pip install --upgrade pip
+#ENV LC_ALL=en_US.UTF-8
 # Reana needs a gcc compiler
-RUN yum install -y gcc
+RUN yum install -y gcc pip python-devel \
+    && pip install --upgrade pip
 RUN pip install reana-client
 
 USER user
