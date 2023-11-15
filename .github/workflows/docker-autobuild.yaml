@@ -2,12 +2,8 @@ name: Docker auto build - VRE DEV
 
 on:
   push:
-    branches: 
-    #   - main
-    # paths:
-    #   - containers/**
-    # tags:
-    #   - '**'
+    path:
+      containers/**
 
 env:
   REGISTRY: ghcr.io
