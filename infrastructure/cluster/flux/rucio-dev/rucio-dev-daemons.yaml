@@ -106,10 +106,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     abacusCollectionReplica:
       threads: 1
@@ -117,10 +117,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     abacusRse:
       fillHistoryTable: 0
@@ -129,10 +129,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     automatix:
       threads: 1
@@ -141,7 +141,7 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "25Mi"
           cpu: "100m"
@@ -168,10 +168,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     conveyorPoller:
       activities: "'Analysis Input' 'Analysis Output' 'Data Brokering' 'Data Consolidation' 'Data rebalancing' 'Debug' 'Express' 'Functional Test' 'Group Subscriptions' 'Production Input' 'Production Output' 'Recovery' 'Staging' 'T0 Export' 'T0 Export' 'T0 Tape' 'User Subscriptions' 'default' 'DAC21'"
@@ -180,10 +180,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     conveyorFinisher:
       threads: 2
@@ -191,10 +191,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     conveyorReceiver:
       threads: 2
@@ -254,10 +254,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "400m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "400m" # "700m"
 
     judgeCleaner:
       threads: 2
@@ -265,10 +265,10 @@ spec:
       resources:
         limits:
           memory: "1200Mi"
-          cpu: "1000m"
+          cpu: "400m" # "1000m"
         requests:
           memory: "100Mi"
-          cpu: "1000m"
+          cpu: "400m" # "1000m"
 
     judgeEvaluator:
       threads: 2
@@ -276,10 +276,10 @@ spec:
       resources:
         limits:
           memory: "3000Mi"
-          cpu: "2000m"
+          cpu: "500m" # "2000m"
         requests:
           memory: "750Mi"
-          cpu: "2000m"
+          cpu: "500m" # "2000m"
 
     judgeInjector:
       threads: 2
@@ -287,10 +287,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     judgeRepairer:
       threads: 2
@@ -298,10 +298,10 @@ spec:
       resources:
         limits:
           memory: "6000Mi"
-          cpu: "1000m"
+          cpu: "400m" # "1000m"
         requests:
           memory: "200Mi"
-          cpu: "1000m"
+          cpu: "400m" # "1000m"
 
     oauthManager:
       threads: 1
@@ -309,10 +309,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     undertaker:
       threads: 1
@@ -320,10 +320,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m" 
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     reaper:
       greedy: 1
@@ -335,10 +335,10 @@ spec:
       resources:
         limits:
           memory: "1600Mi"
-          cpu: "2000m"
+          cpu: "800m" # "2000m"
         requests:
           memory: "125Mi"
-          cpu: "400m"
+          cpu: "30m" # "400m"
 
     replicaRecoverer:
       threads: 1
@@ -357,10 +357,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "50Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
 
     tracerKronos:
       threads: 1
@@ -379,10 +379,10 @@ spec:
       resources:
         limits:
           memory: "200Mi"
-          cpu: "700m"
+          cpu: "200m" # "700m"
         requests:
           memory: "25Mi"
-          cpu: "100m"
+          cpu: "50m" # "100m"
 
     minosTemporaryExpiration:
       threads: 1
