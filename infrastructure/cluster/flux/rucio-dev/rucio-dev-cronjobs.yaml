@@ -7,6 +7,7 @@ spec:
   containers:
   - name: rucio-client-dev
     image: ghcr.io/vre-hub/rucio-client:sha-ae6ac2c
+    # To make this pod run, ssh into it and run `j2 /opt/user/rucio.cfg.j2 > /opt/rucio/etc/rucio.cfg` if `rucio whoami` is not working
     imagePullPolicy: Always
     env:
     - name: RUCIO_CFG_RUCIO_HOST
@@ -36,42 +37,128 @@ spec:
         cpu: 100m
         memory: 50Mi
 ---
-# apiVersion: batch/v1
-# kind: CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rucio-noise
+  namespace: rucio-vre
+spec:
+  schedule: "0 */2 * * *"  # Every 2 hours
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure 
+          containers:
+            - name: rucio-noise
+              image: ghcr.io/vre-hub/rucio-noise:sha-e101d52
+              env:              
+                - name: RUCIO_CFG_CLIENT_RUCIO_HOST
+                  value: "https://vre-dev-rucio.cern.ch"
+                - name: RUCIO_CFG_CLIENT_AUTH_HOST
+                  value: "https://vre-dev-auth-rucio.cern.ch"
+                - name: RUCIO_CFG_CLIENT_ACCOUNT
+                  value: "root"
+                - name: RUCIO_CFG_CLIENT_AUTH_TYPE
+                  value: "userpass"
+                - name: RUCIO_CFG_CLIENT_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: rucio-root-account
+                      key: root-username
+                - name: RUCIO_CFG_CLIENT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: rucio-root-account
+                      key: root-password
+              # volumeMounts:
+              # - name: rucio-cfg
+              #   mountPath: /opt/rucio/etc/
+              # - name: prod-rucio-x509up
+              #   mountPath: /tmp/
+              tty: true
+              imagePullPolicy: Always
+              command:
+              - /bin/sh
+              - -c
+              - date; ls -l /etc/pki/tls/certs/; ls -l /tmp/; cd /opt/rucio/etc/; pwd; echo Hello from the DEV rucio-noise container; 
+                export RUCIO_CONFIG=/opt/rucio/etc/rucio.cfg; echo Exported config; cat /opt/rucio/etc/rucio.cfg; rucio -vvv whoami; 
+                cd /home; export FSIZE=10M; FILE_SIZE=${FSIZE} /bin/bash produce_noise.sh; echo "Rucio noise cronjob ${FSIZE} Done!"
+          # volumes:
+          #   - name: rucio-cfg
+          #     secret:
+          #       secretName: escape-service-account
+          #       defaultMode: 0400
+          #   - name: prod-rucio-x509up
+          #     secret:
+          #       secretName: prod-rucio-x509up
+---
+#
+#  This container is missing all the packaged installed in the escape one - to be done when RUCIO creates the corresponding release.
+#
+# apiVersion: v1
+# kind: Pod
 # metadata:
-#   name: rucio-noise
-#   namespace: rucio-vre
+#   name: rucio-client-test-root-user
+#   namespace: rucio-dev
 # spec:
-#   schedule: "*/10 * * * *"
-#   concurrencyPolicy: Forbid
-#   successfulJobsHistoryLimit: 1
-#   jobTemplate:
-#     spec:
-#       template:
-#         spec:
-#           restartPolicy: OnFailure 
-#           containers:
-#             - name: rucio-noise
-#               image: ghcr.io/vre-hub/vre-rucio-noise:v1.0.0-rc0-10-be00405
-#               volumeMounts:
-#               - name: rucio-cfg
-#                 mountPath: /opt/rucio/etc/
-#               - name: prod-rucio-x509up
-#                 mountPath: /tmp/
-#               tty: true
-#               imagePullPolicy: Always
-#               command:
-#               - /bin/sh
-#               - -c
-#               - date; ls -l /etc/pki/tls/certs/; ls -l /tmp/; cd /opt/rucio/etc/; pwd; echo Hello from rucio-noise container; 
-#                 export RUCIO_CONFIG=/opt/rucio/etc/rucio.cfg; echo Exported config; cat /opt/rucio/etc/rucio.cfg; rucio -vvv whoami; 
-#                 cd /home; export FSIZE=10M; FILE_SIZE=${FSIZE} /bin/bash produce_noise.sh; echo "Rucio noise cronjob ${FSIZE} Done!"
-#           volumes:
-#             - name: rucio-cfg
-#               secret:
-#                 secretName: escape-service-account
-#                 defaultMode: 0400
-#             - name: prod-rucio-x509up
-#               secret:
-#                 secretName: prod-rucio-x509up
-#---
+#   containers:
+#   - name: rucio-client-test-root-user
+#     image: ghcr.io/vre-hub/rucio-client-testing:latest
+#     env:
+#     - name: RUCIO_CFG_CLIENT_RUCIO_HOST
+#       value: "https://vre-dev-rucio.cern.ch"
+#     - name: RUCIO_CFG_CLIENT_AUTH_HOST
+#       value: "https://vre-dev-auth-rucio.cern.ch"
+#     - name: RUCIO_CFG_CLIENT_ACCOUNT
+#       value: "root"
+#     - name: RUCIO_CFG_CLIENT_AUTH_TYPE
+#       value: "userpass"
+#     - name: RUCIO_CFG_CLIENT_USERNAME
+#       valueFrom:
+#         secretKeyRef:
+#           name: rucio-root-account
+#           key: root-username
+#     - name: RUCIO_CFG_CLIENT_PASSWORD
+#       valueFrom:
+#         secretKeyRef:
+#           name: rucio-root-account
+#           key: root-password 
+      # From here i'm just testing that the VARs are acorreclty passed to the image.
+    # - name: RUCIO_CFG_CLIENT_CA_CERT
+    #   value: "/etc/pki/tls/certs/CERN-bundle.pem"
+    # - name: RUCIO_CFG_CLIENT_CLIENT_CERT
+    #   value: "/opt/rucio/etc/usercert.pem"
+    # - name: RUCIO_CFG_CLIENT_CLIENT_KEY
+    #   value: "/opt/rucio/etc/userkey.pem"
+    # - name: RUCIO_CFG_CLIENT_REQUEST_RETRIES
+    #   value: "3"
+    # - name: RUCIO_CFG_CLIENT_VO
+    #   value: "escape"
+    # - name: RUCIO_CFG_CLIENT_X509_PROXY
+    #   value: "/tmp/x509up_u0"
+    # - name: RUCIO_CFG_COMMON_MULTI_VO
+    #   value: "test_value"
+    # - name: RUCIO_CFG_POLICY_LFN2PFN_ALGORITHM_DEFAULT
+    #   value: "hash"
+    # - name: RUCIO_CFG_POLICY_PACKAGE
+    #   value: "escape"
+    # - name: RUCIO_CFG_POLICY_PERMISSION
+    #   value: "escape"
+    # - name: RUCIO_CFG_POLICY_SCHEMA
+    #   value: "escape"
+    # - name: RUCIO_CFG_POLICY_SUPPORT
+    #   value: "https://github.com/rucio/rucio/issues/"
+    # - name: RUCIO_CFG_POLICY_SUPPORT_RUCIO
+    #   value: "https://github.com/rucio/rucio/issues/"
+#     command: ["sleep","3600"]
+#     resources:
+#       limits:
+#         cpu: 100m
+#         memory: 50Mi
+#       requests:
+#         cpu: 100m
+#         memory: 50Mi
+# ---
