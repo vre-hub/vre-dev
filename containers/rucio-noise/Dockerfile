@@ -49,7 +49,11 @@ RUN yum install -y gcc pip python-devel \
     && pip install --upgrade pip
 RUN pip install reana-client
 
-ADD --chown=user:user rucio.cfg.escape.j2 /opt/user/rucio.cfg.j2
+# ADD --chown=user:user rucio.cfg.escape.j2 /opt/user/rucio.cfg.j2
+
+# Overwritting the path in rucio init script
+ADD init_rucio.sh /etc/profile.d/init_rucio.sh
+
 # To here testing the reana-client base image
 
 WORKDIR /home
