@@ -35,6 +35,9 @@ spec:
       - secretName: server-cafile
         mountPath: /etc/grid-security/ca.pem
         subPath: ca.pem
+      - secretName: rse-accounts
+        mountPath: /opt/rucio/etc/rse-accounts.cfg
+        subPath: rse-accounts.cfg
 
     additionalEnvs: 
       # # **KIKE**: This is gonna be a pain in the ass.
@@ -123,6 +126,9 @@ spec:
       policy:
         permission: "escape"
         schema: "escape"
+
+      credentials:
+        gcs: "/opt/rucio/etc/rse-accounts.cfg"
       
     serverResources: 
       limits:
