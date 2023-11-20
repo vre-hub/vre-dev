@@ -8,6 +8,8 @@ LABEL org.opencontainers.image.source https://github.com/vre-hub/vre-dev
 ARG BUILD_DATE
 LABEL org.label-schema.build-date=$BUILD_DATE
 
+USER root
+
 # cleanup yum cache
 RUN yum upgrade -y \
     && yum clean all \
@@ -16,8 +18,6 @@ RUN yum upgrade -y \
 # install useful tools
 RUN yum -y install git htop wget voms-clients-cpp
 RUN pip install --upgrade pip
-
-USER root
 
 # EGI trust anchors
 RUN curl -Lo /etc/yum.repos.d/egi-trustanchors.repo https://repository.egi.eu/sw/production/cas/1/current/repo-files/egi-trustanchors.repo \
