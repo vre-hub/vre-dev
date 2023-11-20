@@ -127,8 +127,8 @@ spec:
         permission: "escape"
         schema: "escape"
 
-      # credentials:
-      #   gcs: "/opt/rucio/etc/rse-accounts.cfg"
+      credentials:
+        gcs: "/opt/rucio/etc/rse-accounts.cfg"
       
     serverResources: 
       limits:
