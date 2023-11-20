@@ -36,65 +36,65 @@ spec:
       requests:
         cpu: 100m
         memory: 50Mi
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: rucio-noise
-  namespace: rucio-vre
-spec:
-  schedule: "0 */2 * * *"  # Every 2 hours
-  concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 1
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          restartPolicy: OnFailure 
-          containers:
-            - name: rucio-noise
-              image: ghcr.io/vre-hub/rucio-noise:sha-e101d52
-              env:              
-                - name: RUCIO_CFG_CLIENT_RUCIO_HOST
-                  value: "https://vre-dev-rucio.cern.ch"
-                - name: RUCIO_CFG_CLIENT_AUTH_HOST
-                  value: "https://vre-dev-auth-rucio.cern.ch"
-                - name: RUCIO_CFG_CLIENT_ACCOUNT
-                  value: "root"
-                - name: RUCIO_CFG_CLIENT_AUTH_TYPE
-                  value: "userpass"
-                - name: RUCIO_CFG_CLIENT_USERNAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: rucio-root-account
-                      key: root-username
-                - name: RUCIO_CFG_CLIENT_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: rucio-root-account
-                      key: root-password
-              # volumeMounts:
-              # - name: rucio-cfg
-              #   mountPath: /opt/rucio/etc/
-              # - name: prod-rucio-x509up
-              #   mountPath: /tmp/
-              tty: true
-              imagePullPolicy: Always
-              command:
-              - /bin/sh
-              - -c
-              - date; ls -l /etc/pki/tls/certs/; ls -l /tmp/; cd /opt/rucio/etc/; pwd; echo Hello from the DEV rucio-noise container; 
-                export RUCIO_CONFIG=/opt/rucio/etc/rucio.cfg; echo Exported config; cat /opt/rucio/etc/rucio.cfg; rucio -vvv whoami; 
-                cd /home; export FSIZE=10M; FILE_SIZE=${FSIZE} /bin/bash produce_noise.sh; echo "Rucio noise cronjob ${FSIZE} Done!"
-          # volumes:
-          #   - name: rucio-cfg
-          #     secret:
-          #       secretName: escape-service-account
-          #       defaultMode: 0400
-          #   - name: prod-rucio-x509up
-          #     secret:
-          #       secretName: prod-rucio-x509up
----
+# ---
+# apiVersion: batch/v1
+# kind: CronJob
+# metadata:
+#   name: rucio-noise
+#   namespace: rucio-dev
+# spec:
+#   schedule: "0 */2 * * *"  # Every 2 hours
+#   concurrencyPolicy: Forbid
+#   successfulJobsHistoryLimit: 1
+#   jobTemplate:
+#     spec:
+#       template:
+#         spec:
+#           restartPolicy: OnFailure 
+#           containers:
+#             - name: rucio-noise
+#               image: ghcr.io/vre-hub/rucio-noise:sha-e101d52
+#               env:              
+#                 - name: RUCIO_CFG_CLIENT_RUCIO_HOST
+#                   value: "https://vre-dev-rucio.cern.ch"
+#                 - name: RUCIO_CFG_CLIENT_AUTH_HOST
+#                   value: "https://vre-dev-auth-rucio.cern.ch"
+#                 - name: RUCIO_CFG_CLIENT_ACCOUNT
+#                   value: "root"
+#                 - name: RUCIO_CFG_CLIENT_AUTH_TYPE
+#                   value: "userpass"
+#                 - name: RUCIO_CFG_CLIENT_USERNAME
+#                   valueFrom:
+#                     secretKeyRef:
+#                       name: rucio-root-account
+#                       key: root-username
+#                 - name: RUCIO_CFG_CLIENT_PASSWORD
+#                   valueFrom:
+#                     secretKeyRef:
+#                       name: rucio-root-account
+#                       key: root-password
+#               # volumeMounts:
+#               # - name: rucio-cfg
+#               #   mountPath: /opt/rucio/etc/
+#               # - name: prod-rucio-x509up
+#               #   mountPath: /tmp/
+#               tty: true
+#               imagePullPolicy: Always
+#               command:
+#               - /bin/sh
+#               - -c
+#               - date; ls -l /etc/pki/tls/certs/; ls -l /tmp/; cd /opt/rucio/etc/; pwd; echo Hello from the DEV rucio-noise container; 
+#                 export RUCIO_CONFIG=/opt/rucio/etc/rucio.cfg; echo Exported config; cat /opt/rucio/etc/rucio.cfg; rucio -vvv whoami; 
+#                 cd /home; export FSIZE=10M; FILE_SIZE=${FSIZE} /bin/bash produce_noise.sh; echo "Rucio noise cronjob ${FSIZE} Done!"
+#           # volumes:
+#           #   - name: rucio-cfg
+#           #     secret:
+#           #       secretName: escape-service-account
+#           #       defaultMode: 0400
+#           #   - name: prod-rucio-x509up
+#           #     secret:
+#           #       secretName: prod-rucio-x509up
+# ---
 #
 #  This container is missing all the packaged installed in the escape one - to be done when RUCIO creates the corresponding release.
 #
@@ -161,4 +161,47 @@ spec:
 #       requests:
 #         cpu: 100m
 #         memory: 50Mi
-# ---
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rucio-noise-pod-test
+  namespace: rucio-dev
+spec:
+  containers:
+    - name: rucio-client-test-root-user
+      #image: ghcr.io/vre-hub/rucio-noise:sha-e101d52
+      image: ghcr.io/vre-hub/rucio-noise:sha-61c1178
+      env:            
+      - name: RUCIO_CFG_CLIENT_RUCIO_HOST
+        value: "https://vre-dev-rucio.cern.ch"
+      - name: RUCIO_CFG_CLIENT_AUTH_HOST
+        value: "https://vre-dev-auth-rucio.cern.ch"
+      - name: RUCIO_CFG_CA_CERT
+        value: "/etc/pki/tls/certs/CERN-bundle.pem"
+      - name: RUCIO_CFG_CLIENT_ACCOUNT
+        value: "root"
+      - name: RUCIO_CFG_CLIENT_AUTH_TYPE
+        value: "userpass"
+      - name: RUCIO_CFG_CLIENT_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: rucio-root-account
+            key: root-username
+      - name: RUCIO_CFG_CLIENT_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: rucio-root-account
+            key: root-password
+      - name: RUCIO_CFG_CREDENTIALS_GCS
+        value: "/opt/rucio/etc/rse-accounts.cfg"
+      - name: RUCIO_CFG_CREDENTIALS_SIGNATURE_LIFETIME
+        value: "3600"
+      command: ["sleep","3600"]
+      resources:
+        limits:
+          cpu: 100m
+          memory: 50Mi
+        requests:
+          cpu: 100m
+          memory: 50Mi
