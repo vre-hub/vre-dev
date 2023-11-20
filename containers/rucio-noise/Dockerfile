@@ -1,4 +1,5 @@
-ARG BASEIMAGE=rucio/rucio-server
+ARG BASEIMAGE=rucio/rucio-clients
+#ARG BASEIMAGE=rucio/rucio-server
 ARG BASETAG=release-32.0.0
  
 FROM $BASEIMAGE:$BASETAG
@@ -42,6 +43,14 @@ RUN mkdir -p /etc/grid-security/vomsdir/escape \
 # Install latest kubectl
 RUN curl -o /usr/bin/kubectl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 RUN chmod +x /usr/bin/kubectl
+
+# From here 
+RUN yum install -y gcc pip python-devel \
+    && pip install --upgrade pip
+RUN pip install reana-client
+
+ADD --chown=user:user rucio.cfg.escape.j2 /opt/user/rucio.cfg.j2
+# To here testing the reana-client base image
 
 WORKDIR /home
 
