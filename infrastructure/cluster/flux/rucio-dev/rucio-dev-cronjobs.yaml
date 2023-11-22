@@ -6,7 +6,7 @@ metadata:
 spec:
   containers:
   - name: rucio-client-dev
-    image: ghcr.io/vre-hub/vre-dev/rucio-client:latest
+    image: ghcr.io/vre-hub/vre-dev/rucio-client:sha-64443d9
     # To make this pod run, ssh into it and run `j2 /opt/user/rucio.cfg.j2 > /opt/rucio/etc/rucio.cfg` if `rucio whoami` is not working
     imagePullPolicy: Always
     env:
@@ -107,7 +107,7 @@ metadata:
 spec:
   containers:
     - name: rucio-client-test-root-user
-      image: ghcr.io/vre-hub/vre-de/rucio-noise:latest
+      image: ghcr.io/vre-hub/vre-de/rucio-noise:sha-64443d9
       # Need to run `python3 /usr/local/rucio/tools/merge_rucio_configs.py --use-env -d /opt/rucio/etc/rucio.cfg`
       env:            
       - name: RUCIO_CFG_CLIENT_RUCIO_HOST
