@@ -16,9 +16,9 @@ spec:
       value: "https://vre-dev-auth-rucio.cern.ch"
     - name: RUCIO_CFG_CLIENT_CA_CERT
       value: "/etc/pki/tls/certs/CERN-bundle.pem"
-    - name: RUCIO_CFG_ACCOUNT
+    - name: RUCIO_CFG_CLIENT_ACCOUNT
       value: "root"
-    - name: RUCIO_CFG_AUTH_TYPE
+    - name: RUCIO_CFG_CLIENT_AUTH_TYPE
       value: "userpass"
     - name: RUCIO_CFG_CLIENT_USERNAME
       valueFrom:
@@ -40,64 +40,62 @@ spec:
       requests:
         cpu: 100m
         memory: 50Mi
-# ---
-# apiVersion: batch/v1
-# kind: CronJob
-# metadata:
-#   name: rucio-noise
-#   namespace: rucio-dev
-# spec:
-#   schedule: "0 */2 * * *"  # Every 2 hours
-#   concurrencyPolicy: Forbid
-#   successfulJobsHistoryLimit: 1
-#   jobTemplate:
-#     spec:
-#       template:
-#         spec:
-#           restartPolicy: OnFailure 
-#           containers:
-#             - name: rucio-noise
-#               image: ghcr.io/vre-hub/rucio-noise:sha-e101d52
-#               env:              
-#                 - name: RUCIO_CFG_CLIENT_RUCIO_HOST
-#                   value: "https://vre-dev-rucio.cern.ch"
-#                 - name: RUCIO_CFG_CLIENT_AUTH_HOST
-#                   value: "https://vre-dev-auth-rucio.cern.ch"
-#                 - name: RUCIO_CFG_CLIENT_ACCOUNT
-#                   value: "root"
-#                 - name: RUCIO_CFG_CLIENT_AUTH_TYPE
-#                   value: "userpass"
-#                 - name: RUCIO_CFG_CLIENT_USERNAME
-#                   valueFrom:
-#                     secretKeyRef:
-#                       name: rucio-root-account
-#                       key: root-username
-#                 - name: RUCIO_CFG_CLIENT_PASSWORD
-#                   valueFrom:
-#                     secretKeyRef:
-#                       name: rucio-root-account
-#                       key: root-password
-#               # volumeMounts:
-#               # - name: rucio-cfg
-#               #   mountPath: /opt/rucio/etc/
-#               # - name: prod-rucio-x509up
-#               #   mountPath: /tmp/
-#               tty: true
-#               imagePullPolicy: Always
-#               command:
-#               - /bin/sh
-#               - -c
-#               - date; ls -l /etc/pki/tls/certs/; ls -l /tmp/; cd /opt/rucio/etc/; pwd; echo Hello from the DEV rucio-noise container; 
-#                 export RUCIO_CONFIG=/opt/rucio/etc/rucio.cfg; echo Exported config; cat /opt/rucio/etc/rucio.cfg; rucio -vvv whoami; 
-#                 cd /home; export FSIZE=10M; FILE_SIZE=${FSIZE} /bin/bash produce_noise.sh; echo "Rucio noise cronjob ${FSIZE} Done!"
-#           # volumes:
-#           #   - name: rucio-cfg
-#           #     secret:
-#           #       secretName: escape-service-account
-#           #       defaultMode: 0400
-#           #   - name: prod-rucio-x509up
-#           #     secret:
-#           #       secretName: prod-rucio-x509up
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rucio-noise
+  namespace: rucio-dev
+spec:
+  schedule: "0 */2 * * *"  # Every 2 hours
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure 
+          containers:
+            - name: rucio-noise
+              image: ghcr.io/vre-hub/rucio-noise:sha-e101d52
+              env:              
+                - name: RUCIO_CFG_CLIENT_RUCIO_HOST
+                  value: "https://vre-dev-rucio.cern.ch"
+                - name: RUCIO_CFG_CLIENT_AUTH_HOST
+                  value: "https://vre-dev-auth-rucio.cern.ch"
+                - name: RUCIO_CFG_CLIENT_ACCOUNT
+                  value: "root"
+                - name: RUCIO_CFG_CLIENT_AUTH_TYPE
+                  value: "userpass"
+                - name: RUCIO_CFG_CLIENT_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: rucio-root-account
+                      key: root-username
+                - name: RUCIO_CFG_CLIENT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: rucio-root-account
+                      key: root-password
+              imagePullPolicy: Always
+              command: |
+                date
+                echo "ls -l /etc/pki/tls/certs/"; ls -l /etc/pki/tls/certs/
+                echo "ls -l /tmp"; ls -l /tmp
+                echo "Hello from the DEV rucio-noise container" 
+                echo "cat RUCIO config"
+                cat /opt/rucio/etc/rucio.cfg
+                cd home
+                export FSIZE=1M; FILE_SIZE=${FSIZE} /bin/bash produce_noise.sh
+                echo "Rucio noise cronjob ${FSIZE} Done!"
+              # volumeMounts:
+              # - name: prod-rucio-x509up
+              #   mountPath: /tmp/
+              # tty: true                
+          # volumes:
+          #   - name: prod-rucio-x509up
+          #     secret:
+          #       secretName: prod-rucio-x509up
 ---
 apiVersion: v1
 kind: Pod
