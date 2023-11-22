@@ -46,7 +46,8 @@ jobs:
             latest=true
           tags: |
             type=sha
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.context }}
+          # saving the images as {ghcr.io}/{vre-hub/vre-dev}/{matrix.context}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.context }}  
 
       - name: Build and push ${{ matrix.context }}
         id: build-and-push
