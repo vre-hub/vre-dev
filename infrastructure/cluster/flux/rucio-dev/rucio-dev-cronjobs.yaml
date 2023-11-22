@@ -98,46 +98,46 @@ spec:
 #           #   - name: prod-rucio-x509up
 #           #     secret:
 #           #       secretName: prod-rucio-x509up
-# ---
-# apiVersion: v1
-# kind: Pod
-# metadata:
-#   name: rucio-noise
-#   namespace: rucio-dev
-# spec:
-#   containers:
-#   - name: rucio-noise
-#     image: ghcr.io/vre-hub/vre-dev/rucio-noise:sha-06361d8
-#     imagePullPolicy: IfNotPresent
-#     # Need to run `python3 /usr/local/rucio/tools/merge_rucio_configs.py --use-env -d /opt/rucio/etc/rucio.cfg`
-#     env:            
-#     - name: RUCIO_CFG_CLIENT_RUCIO_HOST
-#       value: "https://vre-dev-rucio.cern.ch"
-#     - name: RUCIO_CFG_CLIENT_AUTH_HOST
-#       value: "https://vre-dev-auth-rucio.cern.ch"
-#     - name: RUCIO_CFG_CLIENT_CA_CERT
-#       value: "/etc/pki/tls/certs/CERN-bundle.pem"
-#     - name: RUCIO_CFG_CLIENT_ACCOUNT
-#       value: "root"
-#     - name: RUCIO_CFG_CLIENT_AUTH_TYPE
-#       value: "userpass"
-#     - name: RUCIO_CFG_CLIENT_USERNAME
-#       valueFrom:
-#         secretKeyRef:
-#           name: rucio-root-account
-#           key: root-username
-#     - name: RUCIO_CFG_CLIENT_PASSWORD
-#       valueFrom:
-#         secretKeyRef:
-#           name: rucio-root-account
-#           key: root-password
-#     - name: RUCIO_CFG_CREDENTIALS_GCS
-#       value: "/opt/rucio/etc/rse-accounts.cfg"
-#     command: ["sleep","3600"]
-#     resources:
-#       limits:
-#         cpu: 100m
-#         memory: 50Mi
-#       requests:
-#         cpu: 100m
-#         memory: 50Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rucio-noise
+  namespace: rucio-dev
+spec:
+  containers:
+  - name: rucio-noise
+    image: ghcr.io/vre-hub/vre-dev/rucio-noise:sha-06361d8
+    imagePullPolicy: IfNotPresent
+    # Need to run `python3 /usr/local/rucio/tools/merge_rucio_configs.py --use-env -d /opt/rucio/etc/rucio.cfg`
+    env:            
+    - name: RUCIO_CFG_CLIENT_RUCIO_HOST
+      value: "https://vre-dev-rucio.cern.ch"
+    - name: RUCIO_CFG_CLIENT_AUTH_HOST
+      value: "https://vre-dev-auth-rucio.cern.ch"
+    - name: RUCIO_CFG_CLIENT_CA_CERT
+      value: "/etc/pki/tls/certs/CERN-bundle.pem"
+    - name: RUCIO_CFG_CLIENT_ACCOUNT
+      value: "root"
+    - name: RUCIO_CFG_CLIENT_AUTH_TYPE
+      value: "userpass"
+    - name: RUCIO_CFG_CLIENT_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: rucio-root-account
+          key: root-username
+    - name: RUCIO_CFG_CLIENT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: rucio-root-account
+          key: root-password
+    - name: RUCIO_CFG_CREDENTIALS_GCS
+      value: "/opt/rucio/etc/rse-accounts.cfg"
+    command: ["sleep","3600"]
+    resources:
+      limits:
+        cpu: 100m
+        memory: 50Mi
+      requests:
+        cpu: 100m
+        memory: 50Mi
