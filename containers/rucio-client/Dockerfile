@@ -4,7 +4,7 @@ ARG BUILD_DATE
 
 FROM $BASEIMAGE:$BASETAG
 LABEL maintainer="VRE Team - DEV image"
-LABEL org.opencontainers.image.source https://github.com/vre-hub/vre
+LABEL org.opencontainers.image.source https://github.com/vre-hub/vre-dev
 LABEL org.label-schema.build-date=$BUILD_DATE
 
 USER root
@@ -30,11 +30,12 @@ RUN mkdir -p /etc/vomses \
 RUN mkdir -p /etc/grid-security/vomsdir/escape \
     && wget https://indigo-iam.github.io/escape-docs/voms-config/voms-escape.cloud.cnaf.infn.it.lsc -O /etc/grid-security/vomsdir/escape/voms-escape.cloud.cnaf.infn.it.lsc
 
+# This is kept here just for testing from inside the container. To be removed when moved to v32 to the vre
+ADD --chown=user:user rucio.cfg.escape.j2 /opt/user/rucio.cfg.j2  
 # ESCAPE Rucio setup
-ADD --chown=user:user rucio.cfg.escape.j2 /opt/user/rucio.cfg.j2
+ADD --chown=user:user rucio.default.cfg /opt/user/rucio.default.cfg
 
 # install reana-client 
-#ENV LC_ALL=en_US.UTF-8
 # Reana needs a gcc compiler
 RUN yum install -y gcc pip python-devel \
     && pip install --upgrade pip
