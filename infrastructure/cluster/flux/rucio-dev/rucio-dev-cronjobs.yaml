@@ -10,9 +10,9 @@ spec:
     # To make this pod run, ssh into it and run `j2 /opt/user/rucio.cfg.j2 > /opt/rucio/etc/rucio.cfg` if `rucio whoami` is not working
     imagePullPolicy: Always
     env:
-    - name: RUCIO_CFG_RUCIO_HOST
+    - name: RUCIO_CFG_CLIENT_RUCIO_HOST
       value: "https://vre-dev-rucio.cern.ch"
-    - name: RUCIO_CFG_AUTH_HOST
+    - name: RUCIO_CFG_CLIENT_AUTH_HOST
       value: "https://vre-dev-auth-rucio.cern.ch"
     - name: RUCIO_CFG_CLIENT_CA_CERT
       value: "/etc/pki/tls/certs/CERN-bundle.pem"
