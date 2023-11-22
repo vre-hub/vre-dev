@@ -92,7 +92,7 @@ spec:
     #     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     #   path: /
     #   hosts: 
-    #     - vre-rucio-ui.cern.ch
+    #     - vre-dev-rucio-ui.cern.ch
         
     ## values used to configure apache
     httpd_config:
