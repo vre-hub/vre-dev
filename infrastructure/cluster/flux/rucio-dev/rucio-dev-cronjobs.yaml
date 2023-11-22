@@ -6,7 +6,7 @@ metadata:
 spec:
   containers:
   - name: rucio-client
-    image: ghcr.io/vre-hub/vre-dev/rucio-client:sha-875d956
+    image: ghcr.io/vre-hub/vre-dev/rucio-client:sha-c93a67c
     # To make this pod run, ssh into it and run `j2 /opt/user/rucio.cfg.j2 > /opt/rucio/etc/rucio.cfg` if `rucio whoami` is not working
     imagePullPolicy: Always
     env:
@@ -57,7 +57,7 @@ spec:
           restartPolicy: OnFailure 
           containers:
             - name: rucio-noise
-              image: ghcr.io/vre-hub/rucio-noise:sha-e101d52
+              image: ghcr.io/vre-hub/vre-dev/rucio-noise:sha-c93a67c
               env:              
                 - name: RUCIO_CFG_CLIENT_RUCIO_HOST
                   value: "https://vre-dev-rucio.cern.ch"
@@ -78,16 +78,12 @@ spec:
                       name: rucio-root-account
                       key: root-password
               imagePullPolicy: Always
-              command: |
-                date
-                echo "ls -l /etc/pki/tls/certs/"; ls -l /etc/pki/tls/certs/
-                echo "ls -l /tmp"; ls -l /tmp
-                echo "Hello from the DEV rucio-noise container" 
-                echo "cat RUCIO config"
-                cat /opt/rucio/etc/rucio.cfg
-                cd home
-                export FSIZE=1M; FILE_SIZE=${FSIZE} /bin/bash produce_noise.sh
-                echo "Rucio noise cronjob ${FSIZE} Done!"
+              command: 
+              - /bin/bash
+              - -c
+              - date; echo "ls -l /etc/pki/tls/certs/"; ls -l /etc/pki/tls/certs/; echo "ls -l /tmp"; ls -l /tmp;
+                echo "Hello from the DEV rucio-noise container"; echo "cat RUCIO config"; cat /opt/rucio/etc/rucio.cfg;
+                cd home; export FSIZE=1M; FILE_SIZE=${FSIZE} /bin/bash produce_noise.sh; echo "Rucio noise cronjob ${FSIZE} Done!"
               # volumeMounts:
               # - name: prod-rucio-x509up
               #   mountPath: /tmp/
@@ -105,7 +101,7 @@ metadata:
 spec:
   containers:
   - name: rucio-noise
-    image: ghcr.io/vre-hub/vre-dev/rucio-noise:sha-06361d8
+    image: ghcr.io/vre-hub/vre-dev/rucio-noise:sha-c93a67c
     imagePullPolicy: IfNotPresent
     # Need to run `python3 /usr/local/rucio/tools/merge_rucio_configs.py --use-env -d /opt/rucio/etc/rucio.cfg`
     env:            
