@@ -65,7 +65,7 @@ spec:
         service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
       
     image:
-      repository: rucio/rucio-ui
+      repository: rucio/rucio-webui
       tag: release-32.0.0
       # tag: release-1.31.7
       pullPolicy: Always
