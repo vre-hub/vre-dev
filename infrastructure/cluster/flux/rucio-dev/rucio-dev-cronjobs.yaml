@@ -6,7 +6,7 @@ metadata:
 spec:
   containers:
   - name: rucio-client
-    image: ghcr.io/vre-hub/vre-dev/rucio-client:sha-c93a67c
+    image: ghcr.io/vre-hub/vre-dev/rucio-client:sha-0fa787d
     # To make this pod run, ssh into it and run `j2 /opt/user/rucio.cfg.j2 > /opt/rucio/etc/rucio.cfg` if `rucio whoami` is not working
     imagePullPolicy: Always
     env:
