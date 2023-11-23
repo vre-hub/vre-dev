@@ -16,7 +16,7 @@ spec:
       interval: 1m
       chart: rucio-ui
       # version: 1.30.0
-      version: 1.30.2
+      version: "1.30.2"
   valuesFrom:
     - kind: Secret
       name: rucio-dev-db
@@ -24,7 +24,6 @@ spec:
       targetPath: config.database.default
 
   values:
-
     secretMounts:
       - secretName: hostcert
         mountPath: /etc/grid-security/hostcert.pem
@@ -56,11 +55,11 @@ spec:
       #   service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
 
       type: LoadBalancer
-      useSSL: false
+      useSSL: true
       port: 80
       targetPort: 80
       protocol: TCP
-      name: http
+      name: https
       annotations:
         service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
       
