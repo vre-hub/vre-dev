@@ -16,7 +16,7 @@ spec:
       interval: 1m
       chart: rucio-ui
       # version: 1.30.0
-      version: 1.30.0
+      version: 32.0.1
   valuesFrom:
     - kind: Secret
       name: rucio-dev-db
@@ -66,7 +66,7 @@ spec:
     image:
       repository: rucio/rucio-ui
       # tag: release-32.0.0
-      tag: release-1.30.0
+      tag: release-32.5.1
       pullPolicy: Always
 
     strategy:
