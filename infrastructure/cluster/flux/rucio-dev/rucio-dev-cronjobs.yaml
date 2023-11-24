@@ -57,7 +57,7 @@ spec:
           restartPolicy: OnFailure 
           containers:
             - name: rucio-noise
-              image: ghcr.io/vre-hub/vre-dev/rucio-noise:sha-c93a67c
+              image: ghcr.io/vre-hub/vre-dev/rucio-noise:sha-a29f887
               env:              
                 - name: RUCIO_CFG_CLIENT_RUCIO_HOST
                   value: "https://vre-dev-rucio.cern.ch"
@@ -101,7 +101,7 @@ metadata:
 spec:
   containers:
   - name: rucio-noise
-    image: ghcr.io/vre-hub/vre-dev/rucio-noise:sha-c93a67c
+    image: ghcr.io/vre-hub/vre-dev/rucio-noise:sha-a29f887
     imagePullPolicy: IfNotPresent
     # Need to run `python3 /usr/local/rucio/tools/merge_rucio_configs.py --use-env -d /opt/rucio/etc/rucio.cfg`
     env:            
