@@ -34,6 +34,9 @@ spec:
       - secretName: cafile
         mountPath: /etc/grid-security/ca.pem
         subPath: ca.pem
+      - secretName: idpsecrets
+        mountPath: /opt/rucio/etc/idpsecrets.json
+        subPath: idpsecrets.json
         
     replicaCount: 1
     exposeErrorLogs: True

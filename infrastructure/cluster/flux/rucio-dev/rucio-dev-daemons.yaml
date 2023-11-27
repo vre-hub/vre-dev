@@ -424,13 +424,16 @@ spec:
         - secretName: fts-key
           mountPath: /opt/rucio/keys/ewp2c01-key.pem
           subPath: ewp2c01-key.pem
+        - secretName: idpsecrets
+          mountPath: /opt/rucio/etc/idpsecrets.json
+          subPath: idpsecrets.json
       additionalEnvs:
-        - name: USERCERT_NAME
-          value: ewp2c01-cert.pem
-        - name: USERKEY_NAME
-          value: ewp2c01-key.pem
-        - name: RUCIO_FTS_SECRETS
-          value: daemons-dev-rucio-x509up 
+        # - name: USERCERT_NAME
+        #   value: ewp2c01-cert.pem
+        # - name: USERKEY_NAME
+        #   value: ewp2c01-key.pem
+        # - name: RUCIO_FTS_SECRETS
+        #   value: daemons-dev-rucio-x509up 
       resources:
         limits:
           cpu: 500m
