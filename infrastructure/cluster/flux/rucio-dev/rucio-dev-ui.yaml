@@ -1,125 +1,125 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-metadata:
-  name: webui-dev
-  namespace: rucio-dev
+# apiVersion: helm.toolkit.fluxcd.io/v2beta1
+# kind: HelmRelease
+# metadata:
+#   name: webui-dev
+#   namespace: rucio-dev
 
-spec:
-  releaseName: webui-dev
-  interval: 5m
-  chart:
-    spec:
-      sourceRef:
-        kind: HelmRepository
-        name: rucio-charts
-        namespace: rucio-dev
-      interval: 1m
-      chart: rucio-ui
-      # version: 1.30.0
-      version: 32.0.1
-  valuesFrom:
-    - kind: Secret
-      name: rucio-dev-db
-      valuesKey: dbfullstring
-      targetPath: config.database.default
+# spec:
+#   releaseName: webui-dev
+#   interval: 5m
+#   chart:
+#     spec:
+#       sourceRef:
+#         kind: HelmRepository
+#         name: rucio-charts
+#         namespace: rucio-dev
+#       interval: 1m
+#       chart: rucio-ui
+#       # version: 1.30.0
+#       version: 32.0.1
+#   valuesFrom:
+#     - kind: Secret
+#       name: rucio-dev-db
+#       valuesKey: dbfullstring
+#       targetPath: config.database.default
 
-  values:
-    secretMounts:
-      - secretName: hostcert
-        mountPath: /etc/grid-security/hostcert.pem
-        subPath: hostcert.pem
-      - secretName: hostkey
-        mountPath: /etc/grid-security/hostkey.pem
-        subPath: hostkey.pem
-      - secretName: cafile
-        mountPath: /etc/grid-security/ca.pem
-        subPath: ca.pem
-      - secretName: idpsecrets
-        mountPath: /opt/rucio/etc/idpsecrets.json
-        subPath: idpsecrets.json
+#   values:
+#     secretMounts:
+#       - secretName: hostcert
+#         mountPath: /etc/grid-security/hostcert.pem
+#         subPath: hostcert.pem
+#       - secretName: hostkey
+#         mountPath: /etc/grid-security/hostkey.pem
+#         subPath: hostkey.pem
+#       - secretName: cafile
+#         mountPath: /etc/grid-security/ca.pem
+#         subPath: ca.pem
+#       - secretName: idpsecrets
+#         mountPath: /opt/rucio/etc/idpsecrets.json
+#         subPath: idpsecrets.json
         
-    replicaCount: 1
-    exposeErrorLogs: True
+#     replicaCount: 1
+#     exposeErrorLogs: True
 
-    # service:
-    #   type: NodePort
-    #   useSSL: true
-    #   port: 443
-    #   targetPort: https
-    #   portName: https
-    service:
-      # type: LoadBalancer
-      # useSSL: true
-      # port: 443
-      # targetPort: 443
-      # protocol: TCP
-      # name: https
-      # annotations:
-      #   service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
+#     # service:
+#     #   type: NodePort
+#     #   useSSL: true
+#     #   port: 443
+#     #   targetPort: https
+#     #   portName: https
+#     service:
+#       # type: LoadBalancer
+#       # useSSL: true
+#       # port: 443
+#       # targetPort: 443
+#       # protocol: TCP
+#       # name: https
+#       # annotations:
+#       #   service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
 
-      type: LoadBalancer
-      useSSL: true
-      port: 80
-      targetPort: 80
-      protocol: TCP
-      name: https
-      annotations:
-        service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
+#       type: LoadBalancer
+#       useSSL: true
+#       port: 80
+#       targetPort: 80
+#       protocol: TCP
+#       name: https
+#       annotations:
+#         service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
       
-    image:
-      repository: rucio/rucio-ui
-      # tag: release-32.0.0
-      tag: release-32.5.1
-      pullPolicy: Always
+#     image:
+#       repository: rucio/rucio-ui
+#       # tag: release-32.0.0
+#       tag: release-32.5.1
+#       pullPolicy: Always
 
-    strategy:
-      type: RollingUpdate
-      rollingUpdate:
-        maxSurge: 1
-        maxUnavailable: 1
+#     strategy:
+#       type: RollingUpdate
+#       rollingUpdate:
+#         maxSurge: 1
+#         maxUnavailable: 1
 
-    minReadySeconds: 5
+#     minReadySeconds: 5
 
-    proxy:
-      rucioProxy: "vre-dev-rucio.cern.ch"
-      rucioProxyScheme: "https"
-      rucioAuthProxy: "vre-dev-auth-rucio.cern.ch"
-      rucioAuthProxyScheme: "https"
+#     proxy:
+#       rucioProxy: "vre-dev-rucio.cern.ch"
+#       rucioProxyScheme: "https"
+#       rucioAuthProxy: "vre-dev-auth-rucio.cern.ch"
+#       rucioAuthProxyScheme: "https"
 
-    # ingress:
-    #   enabled: true
-    #   annotations:
-    #     kubernetes.io/ingress.class: nginx
-    #     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    #     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    #   path: /
-    #   hosts: 
-    #     - vre-dev-rucio-ui.cern.ch
+#     # ingress:
+#     #   enabled: true
+#     #   annotations:
+#     #     kubernetes.io/ingress.class: nginx
+#     #     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+#     #     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+#     #   path: /
+#     #   hosts: 
+#     #     - vre-dev-rucio-ui.cern.ch
         
-    ## values used to configure apache
-    httpd_config:
-      legacy_dn: "False"
+#     ## values used to configure apache
+#     httpd_config:
+#       legacy_dn: "False"
       
-    config:
+#     config:
 
-      database: []
+#       database: []
         
-      policy:
-        # permission: "generic"
-        # schema: "generic"
-        permission: "escape"
-        schema: "escape"
-        lfn2pfn_algorithm_default: "identity"
+#       policy:
+#         # permission: "generic"
+#         # schema: "generic"
+#         permission: "escape"
+#         schema: "escape"
+#         lfn2pfn_algorithm_default: "identity"
 
-      # oidc:
-      #   idpsecrets: "/opt/rucio/etc/idpsecrets.json"
-      #   admin_issuer: "escape"
+#       # oidc:
+#       #   idpsecrets: "/opt/rucio/etc/idpsecrets.json"
+#       #   admin_issuer: "escape"
 
-    resources:
-      limits:
-        cpu: 200m
-        memory: 200Mi
-      requests:
-        cpu: 200m
-        memory: 125Mi
+#     resources:
+#       limits:
+#         cpu: 200m
+#         memory: 200Mi
+#       requests:
+#         cpu: 200m
+#         memory: 125Mi
 
