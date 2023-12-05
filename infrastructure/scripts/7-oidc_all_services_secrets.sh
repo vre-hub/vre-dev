@@ -22,6 +22,12 @@ SECRETS_STORE="/root/software/vre-dev/infrastructure/secrets/rucio-dev"
 RAW_SECRETS_IDP="/root/software/vre-dev/infrastructure/secrets/tmp_local_secrets/idpsecrets.json"
 
 # WATCH OUT that the secret needs to be called ${HELM_RELEASE_SERVER}-idpsecrets, but the reference in the .yaml file is only:
+ 
+ # values:
+ #   secretMounts:
+ #       secretName: idpsecrets
+ #       mountPath: /opt/rucio/etc/idpsecrets.json
+ #       subPath: idpsecrets.json
 
 echo "Creating and applying oidc secrets for server-auth ui and daemons"
 
