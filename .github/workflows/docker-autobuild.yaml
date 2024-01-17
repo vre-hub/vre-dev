@@ -1,62 +1,115 @@
-name: Docker auto build - VRE DEV
+name: Docker auto build - VRE DEV - in containers dir
 
-on:
+on: 
   push:
-    path:
-      containers/**
+    branches:
+      - main
 
 env:
   REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    # permissions:
-    # contents: read
-    # packages: write
-    # # This is used to complete the identity challenge
-    # # with sigstore/fulcio when running outside of PRs.
-    # id-token: write
-    strategy:
-      matrix:
-        context: [
-          'rucio-client',
-          'rucio-noise'
-        ]
-      fail-fast: false
+  build-matrix-from-changed-dirs:
+    runs-on: ubuntu-latest 
+    name: Build matrix from directories with changed files
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2  # "0" (OR "2" -> To retrieve the preceding commit).
 
-      - name: Log in to the GH Container Registry - ${{ env.REGISTRY }}
+      - name: Run changed-files with dir_names
+        id: changed-files
+        uses: tj-actions/changed-files@v41.0.1
+        with:
+          files_ignore: |
+            .github/**
+            infrastructure/**
+            .gitignore
+            *.md
+            *.png
+            LICENSE
+            **/README.md
+          dir_names: "true"
+          dir_names_exclude_current_dir: "true"
+
+      - name: List all changed dirs 
+        id: format-output
+        run: |
+          containers=()
+          for dir in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$dir was changed"
+            tmp_dir=$(echo $dir | cut -d'/' -f2)
+            containers+=("\"${tmp_dir}\"")
+          done
+
+          CONT_LIST=`echo "[${containers[@]}]" |  sed 's/ /,/g'`
+          echo "Updated containers list: $CONT_LIST"
+
+          echo ::set-output name=container_list::$CONT_LIST
+      
+    outputs:
+      modified_containers: ${{ steps.format-output.outputs.container_list }}  
+
+  build-and-push-modified-containers:
+    if: needs.build-matrix-from-changed-dirs.outputs.modified_containers != '[]'
+    needs: build-matrix-from-changed-dirs
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        containers: ${{ fromJSON(needs.build-matrix-from-changed-dirs.outputs.modified_containers) }} 
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Docker Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: Action for git describe
+        id: ghd
+        uses: proudust/gh-describe@v1.6.0
+
+      - name: Check gh-describe output
+        run: |
+          echo "describe  : ${{ steps.ghd.outputs.describe }}"
+          echo "tag       : ${{ steps.ghd.outputs.tag }}"
+          echo "distance  : ${{ steps.ghd.outputs.distance }}"
+          echo "sha       : ${{ steps.ghd.outputs.sha }}"
+          echo "short-sha : ${{ steps.ghd.outputs.short-sha }}"
+
+      - name: Log in to the GH Container Registry
         id: login
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Extract metadata for ${{ matrix.context }}
-        id: meta
-        uses: docker/metadata-action@v4.3.0
+      - name: Extract metadata for ${{ matrix.containers }}
+        id: metadata
+        uses: docker/metadata-action@v5.3.0
         with:
           flavor: |
             latest=true
           tags: |
-            type=sha
-          # saving the images as {ghcr.io}/{vre-hub/vre-dev}/{matrix.context}
-          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.context }}  
+            type=raw,value=${{ steps.ghd.outputs.tag }}-${{ steps.ghd.outputs.distance }}-${{ steps.ghd.outputs.short-sha }}
+          # NOTE that the naming is changed with threspecto to VRE repo
+          # Expected format: ghcr.io/vre-hub/{vre-dev}/{container_name}:{tag}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ matrix.containers }}
 
-      - name: Build and push ${{ matrix.context }}
-        id: build-and-push
-        uses: docker/build-push-action@v4.0.0
+      - name: Build and push ${{ matrix.containers }}
+        id: build
+        uses: docker/build-push-action@v5.1.0
         with:
-          context: ./containers/${{ matrix.context }}
-          file: containers/${{ matrix.context }}/Dockerfile
+          context: containers/${{ matrix.containers }}
+          file: containers/${{ matrix.containers }}/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          # The version of the base image of all ops containers is the latest tag of the base-ops image
+          # `TAG=${{ steps.ghd.outputs.tag }}` has been removed from the following command
           build-args: | 
-            BUILD_DATE=$(date +'%Y-%m-%dT%H:%M:%SZ')    
+            BUILD_DATE=$(date +'%Y-%m-%dT%H:%M:%SZ')          
+            

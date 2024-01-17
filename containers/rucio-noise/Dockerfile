@@ -1,11 +1,11 @@
 ARG BASEIMAGE=rucio/rucio-clients
 #ARG BASEIMAGE=rucio/rucio-server
 ARG BASETAG=release-32.0.0
- 
+ARG BUILD_DATE
+
 FROM $BASEIMAGE:$BASETAG
 LABEL maintainer="VRE TEAM - DEV image"
 LABEL org.opencontainers.image.source https://github.com/vre-hub/vre-dev
-ARG BUILD_DATE
 LABEL org.label-schema.build-date=$BUILD_DATE
 
 USER root
@@ -36,8 +36,8 @@ RUN yum install -y CERN-CA-certs
 
 # ESCAPE VOMS setup
 RUN mkdir -p /etc/vomses \
-    && wget https://indigo-iam.github.io/escape-docs/voms-config/voms-escape.cloud.cnaf.infn.it.vomses -O /etc/vomses/voms-escape.cloud.cnaf.infn.it.vomses
-RUN mkdir -p /etc/grid-security/vomsdir/escape \
+    && wget https://indigo-iam.github.io/escape-docs/voms-config/voms-escape.cloud.cnaf.infn.it.vomses -O /etc/vomses/voms-escape.cloud.cnaf.infn.it.vomses \
+    && mkdir -p /etc/grid-security/vomsdir/escape \
     && wget https://indigo-iam.github.io/escape-docs/voms-config/voms-escape.cloud.cnaf.infn.it.lsc -O /etc/grid-security/vomsdir/escape/voms-escape.cloud.cnaf.infn.it.lsc
 
 # Install latest kubectl

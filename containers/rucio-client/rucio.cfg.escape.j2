@@ -25,4 +25,3 @@ support_rucio = {{ RUCIO_CFG_POLICY_SUPPORT_RUCIO | default('https://github.com/
 
 [credentials]
 gcs = {{ RUCIO_CFG_CREDENTIALS_GCS | default('/opt/rucio/etc/rse-accounts.cfg')}}
-signature_lifetime = {{ RUCIO_CFG_SIGNATURE_LIFETIME | default('3600') }}
