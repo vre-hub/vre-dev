@@ -7,8 +7,8 @@ CONTROLLER_NAME="sealed-secrets-controller" # This can be checked in k8s/Service
 # helm release names
 # HELM_RELEASE_SERVER="servers-dev"
 HELM_RELEASE_SERVER_AUTH="servers-auth-dev"
-HELM_RELEASE_UI="webui-vre"
-HELM_RELEASE_DAEMONS="daemons-vre"
+HELM_RELEASE_UI="webui-dev"
+HELM_RELEASE_DAEMONS="daemons-dev"
 
 # rucio namespace
 RUCIO_NS="rucio-dev"
