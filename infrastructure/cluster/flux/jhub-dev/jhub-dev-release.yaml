@@ -164,8 +164,10 @@ spec:
           #   mountPropagation: HostToContainer
           #   readOnly: true 
       image:
-        name: quay.io/jupyter/scipy-notebook
-        tag: python-3.11.8
+        #name: quay.io/jupyter/scipy-notebook
+        #tag: python-3.11.8
+        name: jupyter/scipy-notebook
+        tag: python-3.10.11
         pullPolicy: Always
       # nodeSelector: 
       #   jupyter: singleuser
