@@ -132,9 +132,9 @@ spec:
       
     serverResources: 
       limits:
-        cpu: "4000m"
+        cpu: "2000m" #"4000m"
         memory: "1000Mi"
       requests:
-        cpu: "2000m"
+        cpu: #"1000m" #"2000m"
         memory: "500Mi"
         
