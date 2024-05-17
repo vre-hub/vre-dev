@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Once the certificates have been split, provide their path to be read when creating the secrets (NEEDS TO BE EXCLUDED FROM COMMITS!!):
-RAW_SECRETS_SERVERS="/root/clusters_CERTS/cern-vre-dev/servers-dev"
-RAW_SECRETS_SERVERS_AUTH="/root/clusters_CERTS/cern-vre-dev/servers-auth-dev"
+RAW_SECRETS_SERVERS="/root/clusters_CERTS/dev-cern-vre/servers-dev"
+RAW_SECRETS_SERVERS_AUTH="/root/clusters_CERTS/dev-cern-vre/servers-auth-dev"
 
 # kubeseal controller namespace
 CONTROLLER_NS="sealed-secrets"
