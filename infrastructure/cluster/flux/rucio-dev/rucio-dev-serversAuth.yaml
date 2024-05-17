@@ -43,8 +43,8 @@ spec:
       # # **KIKE**: This is gonna be a pain in the ass.
       # - name: RUCIO_CA_PATH
       #   value: "/etc/grid-security/certificates"
-      - name: RUCIO_SSL_PROTOCOL
-        value: "-SSLv3 -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3"
+      # - name: RUCIO_SSL_PROTOCOL
+      #   value: "-SSLv3 -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3"
       # - name: RUCIO_HTTPD_PROXY_PROTOCOL_EXCEPTIONS
       #   valueFrom:
       #     fieldRef:
@@ -52,35 +52,25 @@ spec:
 
              
     replicaCount: 1
-
-    useDeprecatedImplicitSecrets: false
-    
-    exposeErrorLogs: false
-
     useSSL: true
     
     image:
       repository: rucio/rucio-server
       tag: release-32.0.0
       pullPolicy: Always
-    imagePullSecrets: []
-    # - name: docker-regcreds
-
-    # The API server listens on port 6443 (by default). 
-    # Therefore, expose the API server on port 443 and listen to 6443. 
-
-    # **KIKE** : This is going to create a loadbalancer, to be checkled on aiadm 
+    
     service:
       type: LoadBalancer
       port: 443
       targetPort: 443
       protocol: TCP
       name: https
-    #   # annotations:
-    #   #   # These annotations are only required for cluster templates <=1.18
-    #   #   loadbalancer.openstack.org/network-id: "798d00f3-2af9-48a0-a7c3-a26d909a2d64"
-    #   #   service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
-    #   #   loadbalancer.openstack.org/cascade-delete: "false"
+      allocateLoadBalancerNodePorts: true 
+      externalTrafficPolicy: Cluster
+      annotations:
+        service.beta.kubernetes.io/openstack-internal-load-balancer: "true" # this just tells openstack that the loadbalanced services are internal to the cluster.
+        loadbalancer.openstack.org/cascade-delete: "false"
+  
 
     serverType: flask
 
