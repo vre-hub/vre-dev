@@ -26,12 +26,12 @@ spec:
 
   values:
     secretMounts:
-      # - secretName: server-hostcert
-      #   mountPath: /etc/grid-security/hostcert.pem
-      #   subPath: hostcert.pem
-      # - secretName: server-hostkey
-      #   mountPath: /etc/grid-security/hostkey.pem
-      #   subPath: hostkey.pem
+      - secretName: server-hostcert
+        mountPath: /etc/grid-security/hostcert.pem
+        subPath: hostcert.pem
+      - secretName: server-hostkey
+        mountPath: /etc/grid-security/hostkey.pem
+        subPath: hostkey.pem
       - secretName: server-cafile
         mountPath: /etc/grid-security/ca.pem
         subPath: ca.pem
