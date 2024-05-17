@@ -35,9 +35,9 @@ spec:
       - secretName: server-cafile
         mountPath: /etc/grid-security/ca.pem
         subPath: ca.pem
-      # - secretName: idpsecrets
-      #   mountPath: /opt/rucio/etc/idpsecrets.json
-      #   subPath: idpsecrets.json
+      - secretName: idpsecrets
+        mountPath: /opt/rucio/etc/idpsecrets.json
+        subPath: idpsecrets.json
     
     additionalEnvs: 
       # # **KIKE**: This is gonna be a pain in the ass.
