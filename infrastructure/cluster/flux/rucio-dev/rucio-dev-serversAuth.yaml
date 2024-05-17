@@ -65,11 +65,11 @@ spec:
       targetPort: 443
       protocol: TCP
       name: https
-      allocateLoadBalancerNodePorts: true 
-      externalTrafficPolicy: Cluster
-      annotations:
-        service.beta.kubernetes.io/openstack-internal-load-balancer: "true" # this just tells openstack that the loadbalanced services are internal to the cluster.
-        loadbalancer.openstack.org/cascade-delete: "false"
+      # allocateLoadBalancerNodePorts: true 
+      # externalTrafficPolicy: Cluster
+      # annotations:
+      #   service.beta.kubernetes.io/openstack-internal-load-balancer: "true" # this just tells openstack that the loadbalanced services are internal to the cluster.
+      #   loadbalancer.openstack.org/cascade-delete: "false"
   
 
     serverType: flask
