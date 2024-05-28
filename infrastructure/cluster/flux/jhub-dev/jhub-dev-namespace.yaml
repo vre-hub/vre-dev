@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: jhub-dev
+  labels:
+    name: jhub-dev
