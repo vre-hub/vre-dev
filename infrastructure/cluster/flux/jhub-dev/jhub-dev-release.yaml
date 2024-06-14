@@ -71,6 +71,7 @@ spec:
           admin_users:
             - garcia
             - gguerrie
+            - mrzengel
 
       extraConfig:
         token-exchange: |
