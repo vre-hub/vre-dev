@@ -1,0 +1,504 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: daemons-dev
+  namespace: rucio-dev
+  annotations:
+    flux.weave.works/automated: "false"
+
+spec:
+  releaseName: daemons-dev
+  interval: 5m
+  chart: 
+    spec: 
+      sourceRef:
+        kind: HelmRepository
+        name: rucio-charts
+        namespace: rucio-dev
+      interval: 1m
+      chart: rucio-daemons
+      version: 32.0.0
+  valuesFrom:
+    - kind: Secret
+      name: rucio-dev-db
+      valuesKey: dbfullstring
+      targetPath: config.database.default      
+
+  values:
+  #   additionalSecrets:
+  #     - volumeName: idpsecrets
+  #       secretName: idpsecrets
+  #       mountPath: /opt/rucio/etc/idpsecrets.json
+  #       subPath: idpsecrets.json
+  #     - volumeName: cafile
+  #       secretName: cafile
+  #       mountPath: /etc/grid-security/ca.pem
+  #       subPath: ca.pem
+  #     - volumeName: rucio-x509up 
+  #       secretName: rucio-x509up 
+  #       mountPath: /tmp/x509up
+  #       subPath: x509up
+   
+      # TO START WITH
+
+      #   https://rucio.cern.ch/documentation/operator/transfers/transfers-overview/#daemon-overview 
+      
+    abacusAccountCount: 1
+    abacusCollectionReplicaCount: 1
+    abacusRseCount: 1
+    automatixCount: 1
+    cacheConsumerCount: 0
+    conveyorTransferSubmitterCount: 1
+    conveyorPollerCount: 1
+    conveyorFinisherCount: 1
+    conveyorReceiverCount: 0
+    conveyorStagerCount: 0
+    conveyorThrottlerCount: 0
+    conveyorPreparerCount: 0 # for debugging, if it is not there the submitter will do the path computation adn source replica selection, and since the preparer needs a secret but I dont know of which kind, let's try without
+    darkReaperCount: 0
+    hermesCount: 1
+    judgeCleanerCount: 1
+    judgeEvaluatorCount: 1
+    judgeInjectorCount: 1
+    judgeRepairerCount: 1
+    oauthManagerCount: 1
+    undertakerCount: 1
+    reaperCount: 1
+    replicaRecovererCount: 0
+    transmogrifierCount: 1
+    tracerKronosCount: 0
+    minosCount: 1
+    minosTemporaryExpirationCount: 0
+    necromancerCount: 1
+
+    image:
+      repository: rucio/rucio-daemons
+      tag: release-32.0.0
+      pullPolicy: Always
+
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+
+    useDeprecatedImplicitSecrets: false
+
+    podLabels: {}
+    podAnnotations: {}
+
+    minReadySeconds: 5
+
+    # monitoring:
+    #   enabled: true
+    #   serviceMonitorEnabled: true
+    #   exporterPort: 8080
+    #   targetPort: 8080
+    #   interval: 30s
+    #   telemetryPath: /metrics
+    #   namespace: monitoring
+    #   labels:
+    #     release: prometheus-operator
+     
+    abacusAccount:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    abacusCollectionReplica:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    abacusRse:
+      fillHistoryTable: 0
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    automatix:
+      threads: 1
+      sleepTime: 30
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "25Mi"
+          cpu: "100m"
+
+    cacheConsumer:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "700m"
+        requests:
+          memory: "25Mi"
+          cpu: "100m"
+
+    conveyorTransferSubmitter:
+      threads: 3 # atlas has 10
+      podAnnotations: {}
+      activities: "'Analysis Input' 'Analysis Output' 'Data Brokering' 'Data Consolidation' 'Data rebalancing' 'Debug' 'Express' 'Functional Test' 'Group Subscriptions' 'Production Input' 'Production Output' 'Recovery' 'Staging' 'T0 Export' 'T0 Export' 'T0 Tape' 'User Subscriptions' 'default' 'DAC21'"
+      sleepTime: 10
+      archiveTimeout: ""
+      bulk: 1000
+      groupBulk: 200
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    conveyorPoller:
+      activities: "'Analysis Input' 'Analysis Output' 'Data Brokering' 'Data Consolidation' 'Data rebalancing' 'Debug' 'Express' 'Functional Test' 'Group Subscriptions' 'Production Input' 'Production Output' 'Recovery' 'Staging' 'T0 Export' 'T0 Export' 'T0 Tape' 'User Subscriptions' 'default' 'DAC21'"
+      threads: 3
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    conveyorFinisher:
+      threads: 2
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    conveyorReceiver:
+      threads: 2
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "700m"
+
+    conveyorThrottler:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "700m"
+
+    conveyorPreparer:
+      threads: 2
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "700m"
+
+    darkReaper:
+      workers: 1
+      chunkSize: "10"
+      scheme: ""
+      rses: ""
+      includeRses: ""
+      excludeRses: ""
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "700m"
+
+    hermes:
+      threads: 2
+      podAnnotations: {}
+      bulk: 1000
+      sleepTime: 10
+      brokerTimeout: 3
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "400m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "400m" # "700m"
+
+    judgeCleaner:
+      threads: 2
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "1200Mi"
+          cpu: "400m" # "1000m"
+        requests:
+          memory: "100Mi"
+          cpu: "400m" # "1000m"
+
+    judgeEvaluator:
+      threads: 2
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "3000Mi"
+          cpu: "500m" # "2000m"
+        requests:
+          memory: "750Mi"
+          cpu: "500m" # "2000m"
+
+    judgeInjector:
+      threads: 2
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    judgeRepairer:
+      threads: 2
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "6000Mi"
+          cpu: "400m" # "1000m"
+        requests:
+          memory: "200Mi"
+          cpu: "400m" # "1000m"
+
+    oauthManager:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    undertaker:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m" 
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    reaper:
+      greedy: 1
+      scheme: ""
+      threads: 2
+      chunkSize: 2
+      includeRses: ""
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "1600Mi"
+          cpu: "800m" # "2000m"
+        requests:
+          memory: "125Mi"
+          cpu: "30m" # "400m"
+
+    replicaRecoverer:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "700m"
+
+    transmogrifier:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "200m" # "700m"
+
+    tracerKronos:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "700m"
+        requests:
+          memory: "50Mi"
+          cpu: "700m"
+
+    minos:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "200m" # "700m"
+        requests:
+          memory: "25Mi"
+          cpu: "50m" # "100m"
+
+    minosTemporaryExpiration:
+      threads: 1
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "700m"
+        requests:
+          memory: "25Mi"
+          cpu: "100m"
+
+    necromancer:
+      podAnnotations: {}
+      resources:
+        limits:
+          memory: "200Mi"
+          cpu: "700m"
+        requests:
+          memory: "25Mi"
+          cpu: "100m"
+          
+    ftsRenewal:
+      schedule: "12 */6 * * *"
+      enabled: 1 
+      image:
+        repository: rucio/fts-cron
+        tag: 32.0.0
+        pullPolicy: Always
+      vos:
+        - vo: "escape"
+          voms: "escape"
+      servers: "https://fts3-devel.cern.ch:8446,https://fts3-pilot.cern.ch:8446"
+      script: 'escape'
+      secretMounts:
+        - secretName: fts-cert
+          mountPath: /opt/rucio/certs/ewp2c01-cert.pem
+          subPath: ewp2c01-cert.pem
+        - secretName: fts-key
+          mountPath: /opt/rucio/keys/ewp2c01-key.pem
+          subPath: ewp2c01-key.pem
+        - secretName: idpsecrets
+          mountPath: /opt/rucio/etc/idpsecrets.json
+          subPath: idpsecrets.json
+      additionalEnvs:
+        # - name: USERCERT_NAME
+        #   value: ewp2c01-cert.pem
+        # - name: USERKEY_NAME
+        #   value: ewp2c01-key.pem
+        # - name: RUCIO_FTS_SECRETS
+        #   value: daemons-dev-rucio-x509up 
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+
+    automaticRestart:
+      enabled: 1
+      image:
+        repository: bitnami/kubectl
+        tag: latest
+        pullPolicy: IfNotPresent
+      # schedule: "7 1 * * *"
+      schedule: "10 */8 * * *"
+      selectorLabel: "app-group=rucio-daemons"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+
+    config:
+      database:
+        pool_size: 10
+        max_overflow: 20
+
+      # oidc:
+      #   idpsecrets: "/opt/rucio/etc/idpsecrets.json"
+      #   admin_issuer: "escape"
+      #   expected_audience: "rucio"
+      #   # expected_scope: "openid profile"
+
+      monitor:
+        enable_metrics: "True"
+     
+      policy:
+        permission: "escape"
+        schema: "escape"
+       
+      conveyor:
+        scheme: "srm,gsiftp,root,http,https"
+        transfertool: "fts3"
+        ftshosts: "https://fts3-pilot.cern.ch:8446"
+        # cacert: "/etc/grid-security/ca.pem"
+        # usercert: "/tmp/x509up"
+        # cacert: "/opt/certs/CERN-bundle.pem"
+        # usercert: "/opt/proxy/x509up"
+
+      # this needs to be messaging_hermes and not messaging-hermes for some reason
+      
+      messaging_hermes:
+        port: "61113"
+        nonssl_port: "61113"
+        use_ssl: "False"
+        destination: "/topic/eosc-dev.rucio.events" #"/topic/escape.rucio.events" changed from escape
+        brokers: "dashb-mb.cern.ch"
+        voname: "escape"
+
+      messaging_fts3:
+        port: "61123"
+        use_ssl: "False"
+        brokers: "dashb-mb.cern.ch"
+        voname: "escape"
+        
