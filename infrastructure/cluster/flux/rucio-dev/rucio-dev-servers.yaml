@@ -40,8 +40,8 @@ spec:
       #   subPath: rse-accounts.cfg
 
     additionalEnvs: 
-      - name: RUCIO_CA_PATH
-        value: "/etc/grid-security/certificates"
+      # - name: RUCIO_CA_PATH
+      #   value: "/etc/grid-security/certificates"
       - name: RUCIO_SSL_PROTOCOL
         value: "-SSLv3 -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3"
       # - name: RUCIO_HTTPD_PROXY_PROTOCOL_EXCEPTIONS
