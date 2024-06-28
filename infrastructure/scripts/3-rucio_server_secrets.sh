@@ -58,3 +58,10 @@ kubectl create secret generic ${HELM_RELEASE_SERVER_AUTH}-server-cafile --dry-ru
 kubeseal --controller-name=${CONTROLLER_NAME} --controller-namespace=${CONTROLLER_NS} --format yaml --namespace=${RUCIO_NS} > ${SECRETS_STORE}/ss_${HELM_RELEASE_SERVER_AUTH}-server-cafile.yaml
 
 kubectl apply -f ${SECRETS_STORE}/ss_${HELM_RELEASE_SERVER_AUTH}-server-cafile.yaml
+
+# Create server secret for the GridCA file
+# The content of this file is the same as in /etc/pki/tls/certs/CERN-GridCA.pem but mv'd.
+kubectl create secret generic ${HELM_RELEASE_SERVER}-server-gridca --dry-run=client --from-file=${RAW_SECRETS_SERVERS}/CERN-GridCA.pem -o yaml | \
+kubeseal --controller-name=${CONTROLLER_NAME} --controller-namespace=${CONTROLLER_NS} --format yaml --namespace=${RUCIO_NS} > ${SECRETS_STORE}/ss_${HELM_RELEASE_SERVER}-server-gridca.yaml
+
+kubectl apply -f ${SECRETS_STORE}/ss_${HELM_RELEASE_SERVER}-server-gridca.yaml
