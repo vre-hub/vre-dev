@@ -72,6 +72,7 @@ spec:
             - garcia
             - gguerrie
             - mzengel
+            - rperezme
 
       extraConfig:
         token-exchange: |
@@ -192,6 +193,10 @@ spec:
           description: "python3.11 and Rucio extension integration "
           kubespawner_override:
             image: ghcr.io/vre-hub/vre-singleuser-py311:latest
+        - display_name: "REANA dev environment"
+          description: "For testing purposes"
+          kubespawner_override:
+            image:  ghcr.io/vre-hub/vre-singleuser-reana-dev:latest
     
       # nodeSelector: 
       #   jupyter: singleuser
