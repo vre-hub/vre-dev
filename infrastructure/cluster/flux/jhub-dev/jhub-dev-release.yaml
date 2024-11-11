@@ -108,15 +108,15 @@ spec:
                   rucio_token = response.json()['access_token']
                   return rucio_token
 
-              async def authenticate(self, handler, data=None):
-                username = await identify_user(handler, data)
-                upstream_token = await token_for_user(username)
-                return {
-                  'name': username,
-                  'auth_state': {
-                    'upstream_token': upstream_token,
-                  },
-                }
+              # async def authenticate(self, handler, data=None):
+              #   username = await identify_user(handler, data)
+              #   upstream_token = await token_for_user(username)
+              #   return {
+              #     'name': username,
+              #     'auth_state': {
+              #       'upstream_token': upstream_token,
+              #     },
+              #   }
                   
               async def pre_spawn_start(self, user, spawner):
                   auth_state = await user.get_auth_state()
