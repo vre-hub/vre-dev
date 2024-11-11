@@ -62,6 +62,7 @@ spec:
           userdata_url: https://iam-escape.cloud.cnaf.infn.it/userinfo
           username_key: preferred_username
           enable_auth_state: true
+          allow_all: true
           scope:
             - openid
             - profile
