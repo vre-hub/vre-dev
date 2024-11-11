@@ -110,12 +110,38 @@ spec:
 
               async def authenticate(self, handler, data=None):
                   code = handler.get_argument("code", None)
-                  print("AUTHENTICATE CODE")
+                  print("AUTHENTICATE CODE - data")
                   pprint.pprint(data)
-                  return await super().authenticate(handler, data)
+                  http_client = self.http_client()
+
+                  params = dict(
+                    redirect_uri=self.get_callback_url(handler),
+                    code=code,
+                    grant_type='authorization_code',
+                  )
+                  
+                  headers = self._get_headers()
+                  token_resp_json = await self._get_token(http_client, headers, params)
+                  user_data_resp_json = await self._get_user_data(http_client, token_resp_json)
+
+                  if callable(self.username_key):
+                      name = self.username_key(user_data_resp_json)
+                  else:
+                      name = user_data_resp_json.get(self.username_key)
+                      if not name:
+                          self.log.error(
+                              "OAuth user contains no key %s: %s", self.username_key, user_data_resp_json
+                          )
+                          return
+
+                  auth_state = self._create_auth_state(token_resp_json, user_data_resp_json)
+
+                  import pprint
+                  pprint.pprint(auth_state)                  
                   
               async def pre_spawn_start(self, user, spawner):
                   auth_state = await user.get_auth_state()
+                  print("PRE SPAWN START - auth_state")
                   pprint.pprint(auth_state)
                   if not auth_state:
                       # user has no auth state
