@@ -83,6 +83,8 @@ spec:
           import requests
           from oauthenticator.generic import GenericOAuthenticator
 
+          from tornado import gen
+
           # custom authenticator to enable auth_state and get access token to set as env var for rucio extension
           class RucioAuthenticator(GenericOAuthenticator):
               def __init__(self, **kwargs):
@@ -99,8 +101,18 @@ spec:
                       'audience': 'rucio'
                   }
                   response = requests.post(self.token_url, data=params)
+
+                  print("EXCHANGE TOKEN RESPONSE")
+                  print(response.json())
+
                   rucio_token = response.json()['access_token']
                   return rucio_token
+
+              async def authenticate(self, handler, data=None):
+                  code = handler.get_argument("code", None)
+                  print("AUTHENTICATE CODE")
+                  pprint.pprint(data)
+                  return await super().authenticate(handler, data)
                   
               async def pre_spawn_start(self, user, spawner):
                   auth_state = await user.get_auth_state()
