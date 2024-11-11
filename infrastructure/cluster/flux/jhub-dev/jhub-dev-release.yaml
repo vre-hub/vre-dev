@@ -113,7 +113,8 @@ spec:
                   if data is not None:
                     print("AUTHENTICATE CODE - data")
                     pprint.pprint(data)
-                  http_client = self.http_client()
+
+                  http_client = self.http_client
 
                   params = dict(
                     redirect_uri=self.get_callback_url(handler),
