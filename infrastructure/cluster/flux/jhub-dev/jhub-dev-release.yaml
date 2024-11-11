@@ -20,12 +20,10 @@ spec:
     - kind: Secret
       name: jhub-dev-iam-secrets
       valuesKey: client_id
-      #targetPath: hub.config.RucioAuthenticator.client_id
       targetPath: hub.config.GenericOAuthenticator.client_id
     - kind: Secret
       name: jhub-dev-iam-secrets
       valuesKey: client_secret
-      #targetPath: hub.config.RucioAuthenticator.client_secret
       targetPath: hub.config.GenericOAuthenticator.client_secret
     - kind: Secret
       name: jhub-dev-db
@@ -63,19 +61,22 @@ spec:
           token_url: https://iam-escape.cloud.cnaf.infn.it/token
           userdata_url: https://iam-escape.cloud.cnaf.infn.it/userinfo
           username_key: preferred_username
+          enable_auth_state: true
           scope:
             - openid
             - profile
             - email
-        Authenticator:
-          admin_users:
-            - garcia
-            - gguerrie
-            - mzengel
-            - rperezme
+        # Authenticator:
+        #   admin_users:
+        #     - garcia
+        #     - gguerrie
+        #     - mzengel
+        #     - rperezme
 
       extraConfig:
         token-exchange: |
+          #!/usr/bin/env python
+          # -*- coding: utf-8 -*-
           import pprint
           import os
           import warnings
@@ -161,27 +162,31 @@ spec:
           - name: cvmfs-vre-dev
             persistentVolumeClaim:
               claimName: cvmfs-pvc
-          # - name: eulake-cern-eos-rse # mounts the EOS RSE needed for the Rucio JupiterLab extension
-          #   hostPath:
-          #     path: /var/eos/eulake # This is pointing to /eos/eulake/escape/data, defined on the eosxd/configmap  
+          - name: eospilot-eulake-dev 
+            hostPath:
+              path: /var/eos/eulake 
         extraVolumeMounts:
           - name: cvmfs-vre-dev
             mountPath: /cvmfs
             # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
             mountPropagation: HostToContainer
-          # - name: eulake-cern-eos-rse # mounts the EOS RSE needed for the Rucio JupiterLab extension
-          #   mountPath: /eos/cern-eos-rse
-          #   mountPropagation: HostToContainer
-          #   readOnly: true 
+          - name: eospilot-eulake-dev 
+            mountPath: /eos/eulake
+            mountPropagation: HostToContainer
+            readOnly: true 
       image:
-        name: quay.io/jupyter/scipy-notebook
-        tag: python-3.11.8
+        # name: quay.io/jupyter/scipy-notebook
+        # tag: python-3.11.8
         # name: jupyter/scipy-notebook
         # tag: python-3.10.11
-        # name: ghcr.io/vre-hub/vre-singleuser-py311
+        name: ghcr.io/vre-hub/vre-singleuser-py311
         # tag: latest
+        tag: sha-5bd80fc
         pullPolicy: Always
       profileList:
+        - display_name: "Default environment"
+          description: "Default VRE environment."
+          default: true
         - display_name: "Python 3.11 environment"
           description: "quay.io/jupyter/scipy-notebook:python-3.11.8 image "
           default: true
@@ -224,9 +229,9 @@ spec:
         RUCIO_DEFAULT_AUTH_TYPE: "oidc"
         RUCIO_OAUTH_ID: "rucio"
         RUCIO_DEFAULT_INSTANCE: "vre-rucio.cern.ch"
-        RUCIO_DESTINATION_RSE: "CERN-EOS"
-      #   RUCIO_RSE_MOUNT_PATH: "/eos/cern-eos-rse"
-      #   RUCIO_PATH_BEGINS_AT: "2"
+        RUCIO_DESTINATION_RSE: "CERN-EOSPILOT"
+        RUCIO_RSE_MOUNT_PATH: "/eos/eulake-dev"
+        RUCIO_PATH_BEGINS_AT: "5"  # eos/pilot/eulake/escape/dev -> /eos/eulake-dev
         RUCIO_CA_CERT: "/certs/rucio_ca.pem"
         OAUTH2_TOKEN: "FILE:/tmp/eos_oauth.token"
 
