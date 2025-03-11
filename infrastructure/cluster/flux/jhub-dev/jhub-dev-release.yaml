@@ -76,15 +76,13 @@ spec:
 
       extraConfig:
         token-exchange: |
-          #!/usr/bin/env python
-          # -*- coding: utf-8 -*-
           import pprint
           import os
           import warnings
           import requests
           from oauthenticator.generic import GenericOAuthenticator
 
-          from tornado import gen
+          #from tornado import gen
 
           # custom authenticator to enable auth_state and get access token to set as env var for rucio extension
           class RucioAuthenticator(GenericOAuthenticator):
@@ -97,6 +95,7 @@ spec:
                       'client_id': self.client_id,
                       'client_secret': self.client_secret,
                       'grant_type': 'urn:ietf:params:oauth:grant-type:token-exchange',
+                      'subject_token_type': 'urn:ietf:params:oauth:token-type:access_token',
                       'subject_token': token,
                       'scope': 'openid profile',
                       'audience': 'rucio'
@@ -107,16 +106,6 @@ spec:
                   rucio_token = response.json()['access_token']
 
                   return rucio_token
-
-              # async def authenticate(self, handler, data=None):
-              #   username = await identify_user(handler, data)
-              #   upstream_token = await token_for_user(username)
-              #   return {
-              #     'name': username,
-              #     'auth_state': {
-              #       'upstream_token': upstream_token,
-              #     },
-              #   }
                   
               async def pre_spawn_start(self, user, spawner):
                   auth_state = await user.get_auth_state()
@@ -124,7 +113,7 @@ spec:
                   pprint.pprint(auth_state)
                   if not auth_state:
                       # user has no auth state
-                      return
+                      return False
                   
                   # define token environment variable from auth_state
                   spawner.environment['RUCIO_ACCESS_TOKEN'] = self.exchange_token(auth_state['access_token'])
@@ -135,13 +124,6 @@ spec:
 
           # enable authentication state
           c.GenericOAuthenticator.enable_auth_state = True
-
-          if 'JUPYTERHUB_CRYPT_KEY' not in os.environ:
-              warnings.warn(
-                  "Need JUPYTERHUB_CRYPT_KEY env for persistent auth_state.\n"
-                  "    export JUPYTERHUB_CRYPT_KEY=$(openssl rand -hex 32)"
-              )
-              c.CryptKeeper.keys = [os.urandom(32)]
         
     singleuser:
       defaultUrl: "/lab"
@@ -167,6 +149,8 @@ spec:
                 echo "auth_type = oidc" >> /opt/rucio/etc/rucio.cfg;
                 echo "oidc_audience = rucio" >> /opt/rucio/etc/rucio.cfg;
                 echo "oidc_polling = true" >> /opt/rucio/etc/rucio.cfg;
+                echo "oidc_issuer = escape" >> /opt/rucio/etc/rucio.cfg;
+                echo "oidc_scope = openid profile offline_access" >> /opt/rucio/etc/rucio.cfg;
                 echo "auth_token_file_path = /tmp/rucio_oauth.token" >> /opt/rucio/etc/rucio.cfg;
 
       networkPolicy:
@@ -198,7 +182,7 @@ spec:
         # tag: python-3.10.11
         name: ghcr.io/vre-hub/vre-singleuser-py311
         # tag: latest
-        tag: sha-5bd80fc
+        tag: sha-281055c
         pullPolicy: Always
       profileList:
         - display_name: "Default environment"
@@ -234,7 +218,7 @@ spec:
 
       cmd: null
       extraEnv:
-
+        RUCIO_MODE: "replica"
         RUCIO_WILDCARD_ENABLED: "1"
         RUCIO_BASE_URL: "https://vre-rucio.cern.ch"
         RUCIO_AUTH_URL: "https://vre-rucio-auth.cern.ch"
