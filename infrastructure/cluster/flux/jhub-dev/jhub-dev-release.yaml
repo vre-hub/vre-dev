@@ -102,11 +102,10 @@ spec:
                       'audience': 'rucio'
                   }
                   response = requests.post(self.token_url, data=params)
-
                   print("EXCHANGE TOKEN RESPONSE")
                   print(response.json())
-
                   rucio_token = response.json()['access_token']
+
                   return rucio_token
 
               # async def authenticate(self, handler, data=None):
@@ -182,7 +181,7 @@ spec:
               claimName: cvmfs-pvc
           - name: eospilot-eulake-dev 
             hostPath:
-              path: /var/eos/eulake 
+              path: /var/eos/pilot
         extraVolumeMounts:
           - name: cvmfs-vre-dev
             mountPath: /cvmfs
