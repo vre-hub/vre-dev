@@ -135,7 +135,7 @@ spec:
               "    export JUPYTERHUB_CRYPT_KEY=$(openssl rand -hex 32)"
           )
           c.CryptKeeper.keys = [os.urandom(32)]
-          
+
           # enable authentication state
           c.GenericOAuthenticator.enable_auth_state = True
         
@@ -214,10 +214,14 @@ spec:
         #   description: "python3.11 and Rucio extension integration "
         #   kubespawner_override:
         #     image: ghcr.io/vre-hub/vre-singleuser-py311:latest
-        - display_name: "REANA dev environment"
-          description: "For testing purposes"
+        # - display_name: "REANA dev environment"
+        #   description: "For testing purposes"
+        #   kubespawner_override:
+        #     image:  ghcr.io/vre-hub/vre-singleuser-reana-dev:latest
+        - display_name: "VRE DEV environment"
+          description: "vre-dev image"
           kubespawner_override:
-            image:  ghcr.io/vre-hub/vre-singleuser-reana-dev:latest
+            image: ghcr.io/vre-hub/vre-singleuser-dev:latest
     
       # nodeSelector: 
       #   jupyter: singleuser
