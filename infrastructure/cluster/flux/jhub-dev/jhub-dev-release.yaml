@@ -126,6 +126,17 @@ spec:
           # set the above authenticator as the default
           c.JupyterHub.authenticator_class = RucioAuthenticator
 
+          crypt_key = os.getenv("JUPYTERHUB_CRYPT_KEY")
+          if crypt_key:
+            c.CryptKeeper.keys = [crypt_key]
+          else:
+            warnings.warn(
+                "Jupyter cannot get JUPYTERHUB_CRYPT_KEY from the env variables.\n"
+                "    Setting it here."
+            )
+            export JUPYTERHUB_CRYPT_KEY=$(openssl rand -hex 32)
+            c.CryptKeeper.keys = [os.environ["JUPYTERHUB_CRYPT_KEY"]]
+
           # enable authentication state
           c.GenericOAuthenticator.enable_auth_state = True
         
