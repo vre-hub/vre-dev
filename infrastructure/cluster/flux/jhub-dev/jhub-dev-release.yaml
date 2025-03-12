@@ -130,12 +130,12 @@ spec:
           if crypt_key:
               c.CryptKeeper.keys = [crypt_key]
           else:
-              warnings.warn(
-                  "Need JUPYTERHUB_CRYPT_KEY env for persistent auth_state.\n"
-                  "    export JUPYTERHUB_CRYPT_KEY=$(openssl rand -hex 32)"
-              )
-              c.CryptKeeper.keys = [os.urandom(32)]
-            
+            warnings.warn(
+              "Need JUPYTERHUB_CRYPT_KEY env for persistent auth_state.\n"
+              "    export JUPYTERHUB_CRYPT_KEY=$(openssl rand -hex 32)"
+          )
+          c.CryptKeeper.keys = [os.urandom(32)]
+          
           # enable authentication state
           c.GenericOAuthenticator.enable_auth_state = True
         
