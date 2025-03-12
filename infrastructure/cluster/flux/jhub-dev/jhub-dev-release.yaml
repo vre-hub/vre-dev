@@ -128,9 +128,9 @@ spec:
 
           crypt_key = os.getenv("JUPYTERHUB_CRYPT_KEY")
           if crypt_key:
-            c.CryptKeeper.keys = [crypt_key]
+              c.CryptKeeper.keys = [crypt_key]
           else:
-            warnings.warn(
+              warnings.warn(
                   "Need JUPYTERHUB_CRYPT_KEY env for persistent auth_state.\n"
                   "    export JUPYTERHUB_CRYPT_KEY=$(openssl rand -hex 32)"
               )
