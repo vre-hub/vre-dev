@@ -8,7 +8,7 @@ metadata:
    
 spec: 
   releaseName: servers-dev
-  interval: 5m
+  interval: 1m
   chart:
     spec:
       sourceRef:
@@ -17,7 +17,7 @@ spec:
         namespace: rucio-dev
       interval: 1m
       chart: rucio-server
-      version: 33.0.3
+      version: 35.0.0
   valuesFrom:
     - kind: Secret
       name: rucio-dev-db
@@ -40,10 +40,12 @@ spec:
       #   subPath: rse-accounts.cfg
 
     additionalEnvs: 
-      # - name: RUCIO_CA_PATH
-      #   value: "/etc/grid-security/certificates"
+      - name: RUCIO_CA_PATH
+        value: "/etc/grid-security/certificates"
       - name: RUCIO_SSL_PROTOCOL
         value: "-SSLv3 -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3"
+      - name: RUCIO_HTTPD_GRID_SITE_ENABLED
+        value: "True"    
       # - name: RUCIO_HTTPD_PROXY_PROTOCOL_EXCEPTIONS
       #   valueFrom:
       #     fieldRef:
@@ -54,7 +56,7 @@ spec:
     
     image:
       repository: rucio/rucio-server
-      tag: release-33.6.1
+      tag: release-35.2.0
       pullPolicy: Always
     imagePullSecrets: []
     # - name: docker-regcreds
@@ -111,11 +113,11 @@ spec:
         pool_size: 10
         max_overflow: 20
       
-      # oidc:
-      #   idpsecrets: "/opt/rucio/etc/idpsecrets.json"
-      #   admin_issuer: "escape"
-      #   expected_audience: "rucio"
-      #   expected_scope: "openid profile"
+      oidc:
+        idpsecrets: "/opt/rucio/etc/idpsecrets.json"
+        admin_issuer: "escape"
+        expected_audience: "rucio"
+        expected_scope: "openid profile"
 
       policy:
         permission: "escape"
