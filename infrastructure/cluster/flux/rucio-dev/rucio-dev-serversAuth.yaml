@@ -84,7 +84,7 @@ spec:
     #   selectorLabel: "'release in (servers-auth-dev),app in (rucio-dev)'"
 
     httpd_config:
-      mpm_mode: "event"
+      # mpm_mode: "event"
       timeout: "300"
       enable_status: "True"
       legacy_dn: "True"
