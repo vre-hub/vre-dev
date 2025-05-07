@@ -5,7 +5,7 @@ metadata:
   namespace: rucio-dev
 
 spec:
-  releaseName: webui-dev
+  releaseName: ui-dev
   interval: 5m
   chart:
     spec:
