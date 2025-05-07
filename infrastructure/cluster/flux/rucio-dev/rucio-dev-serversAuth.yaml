@@ -56,7 +56,7 @@ spec:
     
     image:
       repository: rucio/rucio-server
-      tag: release-35.2.0
+      tag: release-35.2.1
       pullPolicy: Always
     
     service:
@@ -100,7 +100,7 @@ spec:
       max_request_workers: "1280"
       max_connections_per_child: "2048"
       max_clients: "20"
-      # mpm_mode: "worker"
+      mpm_mode: "worker"
 
     ## values used to configure Rucio
     config:
