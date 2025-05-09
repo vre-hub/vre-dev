@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Once the certificates have been split, provide their path to be read when creating the secrets (NEEDS TO BE EXCLUDED FROM COMMITS!!):
-RAW_SECRETS_UI="/root/clusters_CERTS/cern-vre-dev/webui-dev"
+RAW_SECRETS_UI="/root/clusters_CERTS/dev-cern-vre/ui-dev"
 
 # helm release names
-HELM_RELEASE_UI="webui-dev"
+HELM_RELEASE_UI="ui-dev"
 
 # rucio namespace
 RUCIO_NS="rucio-dev"

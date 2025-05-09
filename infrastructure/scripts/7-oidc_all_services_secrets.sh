@@ -5,9 +5,9 @@ CONTROLLER_NS="sealed-secrets"
 CONTROLLER_NAME="sealed-secrets-controller" # This can be checked in k8s/Services
 
 # helm release names
-# HELM_RELEASE_SERVER="servers-dev"
+HELM_RELEASE_SERVER="servers-dev"
 HELM_RELEASE_SERVER_AUTH="servers-auth-dev"
-HELM_RELEASE_UI="webui-dev"
+HELM_RELEASE_UI="ui-dev"
 HELM_RELEASE_DAEMONS="daemons-dev"
 
 # rucio namespace
@@ -29,7 +29,12 @@ RAW_SECRETS_IDP="/root/software/vre-dev/infrastructure/secrets/tmp_local_secrets
  #       mountPath: /opt/rucio/etc/idpsecrets.json
  #       subPath: idpsecrets.json
 
-echo "Creating and applying oidc secrets for server-auth ui and daemons"
+echo "Creating and applying IdP OIDC secrets for server-auth ui and daemons"
+
+kubectl create secret generic ${HELM_RELEASE_SERVER}-idpsecrets --dry-run=client --from-file=${RAW_SECRETS_IDP} -o yaml | \
+kubeseal --controller-name=${CONTROLLER_NAME} --controller-namespace=${CONTROLLER_NS} --format yaml --namespace=${RUCIO_NS} > ${SECRETS_STORE}/ss_${HELM_RELEASE_SERVER}-idpsecrets.yaml
+
+kubectl apply -f ${SECRETS_STORE}/ss_${HELM_RELEASE_SERVER}-idpsecrets.yaml
 
 kubectl create secret generic ${HELM_RELEASE_SERVER_AUTH}-idpsecrets --dry-run=client --from-file=${RAW_SECRETS_IDP} -o yaml | \
 kubeseal --controller-name=${CONTROLLER_NAME} --controller-namespace=${CONTROLLER_NS} --format yaml --namespace=${RUCIO_NS} > ${SECRETS_STORE}/ss_${HELM_RELEASE_SERVER_AUTH}-idpsecrets.yaml
