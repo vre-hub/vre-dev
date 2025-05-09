@@ -26,6 +26,8 @@ spec:
 
   values:
     secretMounts:
+      - secretName: server-gridca
+        mountPath: /etc/grid-security/certificates/
       # - secretName: server-hostcert
       #   mountPath: /etc/grid-security/hostcert.pem
       #   subPath: hostcert.pem
@@ -38,6 +40,9 @@ spec:
       # - secretName: rse-accounts
       #   mountPath: /opt/rucio/etc/rse-accounts.cfg
       #   subPath: rse-accounts.cfg
+      - secretName: idpsecrets
+        mountPath: /opt/rucio/etc/idpsecrets.json
+        subPath: idpsecrets.json
 
     additionalEnvs: 
       - name: RUCIO_CA_PATH
