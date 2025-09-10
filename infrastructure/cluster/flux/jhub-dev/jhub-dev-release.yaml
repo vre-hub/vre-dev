@@ -1,11 +1,11 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease 
+kind: HelmRelease
 metadata:
   name: jhub-dev
   namespace: jhub-dev
 spec:
   releaseName: jhub-dev
-  interval: 1m
+  interval: 5m
   chart:
     spec:
       sourceRef:
@@ -15,16 +15,15 @@ spec:
       chart: jupyterhub
       interval: 5m
       version: 3.3.7
-
   valuesFrom:
     - kind: Secret
       name: jhub-dev-iam-secrets
       valuesKey: client_id
-      targetPath: hub.config.GenericOAuthenticator.client_id
+      targetPath: hub.config.RucioAuthenticator.client_id
     - kind: Secret
       name: jhub-dev-iam-secrets
       valuesKey: client_secret
-      targetPath: hub.config.GenericOAuthenticator.client_secret
+      targetPath: hub.config.RucioAuthenticator.client_secret
     - kind: Secret
       name: jhub-dev-db
       valuesKey: dbfullstring
@@ -33,14 +32,14 @@ spec:
       name: jupyterhub-auth-state
       valuesKey: JUPYTERHUB_CRYPT_KEY
       targetPath: hub.extraEnv.JUPYTERHUB_CRYPT_KEY
-    # - kind: ConfigMap
-    #   name: jhub-profiles
-    #   valuesKey: values.yaml
-    # - kind: Secret
-    #   name: api-dask-dask-gateway
-    #   valuesKey: jupyterhub-api-token
-    #   targetPath: hub.services.dask-gateway.apiToken
-      
+    - kind: Secret
+      name: jhub-dev-zenodo-oauth-secrets
+      valuesKey: client_id
+      targetPath: hub.extraEnv.ZENODO_CLIENT_ID
+    - kind: Secret
+      name: jhub-dev-zenodo-oauth-secrets
+      valuesKey: client_secret
+      targetPath: hub.extraEnv.ZENODO_CLIENT_SECRET
   values:
     proxy:
       service:
@@ -48,15 +47,18 @@ spec:
     hub:
       service:
         type: ClusterIP
-      # network policy needs to be modified to allow access to the Rucio server
-      # (disabling it for now as a workaround, see also the ones for singeluser and proxy below)
       networkPolicy:
         enabled: false
       db:
         type: postgres # secret dbconnect string set in main-helm.tf
+      extraEnv:
+        ZENODO_AUTHORIZE_URL: https://sandbox.zenodo.org/oauth/authorize
+        ZENODO_TOKEN_URL: https://sandbox.zenodo.org/oauth/token
+        ZENODO_SCOPES: "deposit:write deposit:actions"
+        ZENODO_SANDBOX: "true"
       config:
-        JupyterHub: 
-          authenticator_class: "generic-oauth"
+        JupyterHub:
+          authenticator_class: generic-oauth
         RucioAuthenticator:
         # GenericOAuthenticator:
           #client_id: "" # set through secret
@@ -71,12 +73,97 @@ spec:
             - openid
             - profile
             - email
-        # Authenticator:
-        #   admin_users:
-        #     - garcia
-        #     - gguerrie
-        #     - mzengel
-        #     - rperezme
+      services:
+        zenodo-auth:
+          url: http://127.0.0.1:9995
+          command:
+            - bash
+            - -lc
+            - |
+              python3 - <<'PY'
+              import os, secrets, time, json, pathlib, requests
+              from urllib.parse import urlencode
+              from tornado import web, ioloop, httpserver
+              from jupyterhub.services.auth import HubAuthenticated
+
+              ZENDO_AUTHORIZE_DEFAULT = "https://sandbox.zenodo.org/oauth/authorize"
+              ZENDO_TOKEN_DEFAULT = "https://sandbox.zenodo.org/oauth/token"
+              ZENODO_AUTHORIZE_URL = os.environ.get("ZENODO_AUTHORIZE_URL", ZENDO_AUTHORIZE_DEFAULT)
+              ZENODO_TOKEN_URL = os.environ.get("ZENODO_TOKEN_URL", ZENDO_TOKEN_DEFAULT)
+              ZENODO_SCOPES = os.environ.get("ZENODO_SCOPES", "deposit:write deposit:actions")
+              ZENODO_SANDBOX = os.environ.get("ZENODO_SANDBOX", "true")
+              TOKENS_DIR = os.environ.get("ZENODO_TOKENS_DIR", "/srv/jupyterhub/zenodo-tokens")
+
+              class LoginHandler(HubAuthenticated, web.RequestHandler):
+                  async def get(self):
+                      user = await self.get_current_user()
+                      if not user:
+                          raise web.HTTPError(403)
+                      state = secrets.token_urlsafe(24)
+                      self.set_secure_cookie("zen_state", state, httponly=True, secure=True, samesite="lax")
+                      prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "/services/zenodo-auth/")
+                      callback_path = prefix.rstrip("/") + "/callback"
+                      redirect_uri = os.environ.get("ZENODO_REDIRECT_URI") or f"{self.request.protocol}://{self.request.host}{callback_path}"
+                      params = {
+                          "response_type": "code",
+                          "client_id": os.environ["ZENODO_CLIENT_ID"],
+                          "redirect_uri": redirect_uri,
+                          "scope": ZENODO_SCOPES,
+                          "state": state,
+                      }
+                      self.redirect(f"{ZENODO_AUTHORIZE_URL}?{urlencode(params)}")
+
+              class CallbackHandler(HubAuthenticated, web.RequestHandler):
+                  async def get(self):
+                      user = await self.get_current_user()
+                      if not user:
+                          raise web.HTTPError(403)
+                      state_cookie = self.get_secure_cookie("zen_state")
+                      state_param = self.get_argument("state", "")
+                      if not state_cookie or state_cookie.decode() != state_param:
+                          raise web.HTTPError(400, "Invalid state")
+                      code = self.get_argument("code", "")
+                      prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "/services/zenodo-auth/")
+                      callback_path = prefix.rstrip("/") + "/callback"
+                      redirect_uri = os.environ.get("ZENODO_REDIRECT_URI") or f"{self.request.protocol}://{self.request.host}{callback_path}"
+                      data = {
+                          "grant_type": "authorization_code",
+                          "code": code,
+                          "redirect_uri": redirect_uri,
+                          "client_id": os.environ["ZENODO_CLIENT_ID"],
+                          "client_secret": os.environ["ZENODO_CLIENT_SECRET"],
+                      }
+                      r = requests.post(ZENODO_TOKEN_URL, data=data, timeout=20)
+                      r.raise_for_status()
+                      tok = r.json()
+                      access_token = tok["access_token"]
+                      expires_in = int(tok.get("expires_in", 3600))
+                      pathlib.Path(TOKENS_DIR).mkdir(parents=True, exist_ok=True)
+                      with open(os.path.join(TOKENS_DIR, f"{user['name']}.json"), "w") as f:
+                          json.dump({
+                              "access_token": access_token,
+                              "expires_at": int(time.time()) + expires_in,
+                              "scopes": ZENODO_SCOPES,
+                              "sandbox": ZENODO_SANDBOX,
+                          }, f)
+                      self.clear_cookie("zen_state")
+                      self.redirect("/hub/home")
+
+              def make_app():
+                  prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "/services/zenodo-auth/")
+                  return web.Application([
+                      (prefix.rstrip("/") + "/login", LoginHandler),
+                      (prefix.rstrip("/") + "/callback", CallbackHandler),
+                  ])
+
+              if __name__ == "__main__":
+                  app = make_app()
+                  server = httpserver.HTTPServer(app)
+                  server.listen(9995, address='127.0.0.1')
+                  ioloop.IOLoop.current().start()
+              PY
+          environment:
+            ZENODO_TOKENS_DIR: /srv/jupyterhub/zenodo-tokens
 
       extraConfig:
         token-exchange: |
@@ -86,9 +173,6 @@ spec:
           import requests
           from oauthenticator.generic import GenericOAuthenticator
 
-          #from tornado import gen
-
-          # custom authenticator to enable auth_state and get access token to set as env var for rucio extension
           class RucioAuthenticator(GenericOAuthenticator):
               def __init__(self, **kwargs):
                   super().__init__(**kwargs)
@@ -107,38 +191,56 @@ spec:
                   response = requests.post(self.token_url, data=params)
                   print("EXCHANGE TOKEN RESPONSE")
                   print(response.json())
-                  rucio_token = response.json()['access_token']
-
+                  rucio_token = response.json().get('access_token')
                   return rucio_token
-                  
+
               async def pre_spawn_start(self, user, spawner):
-                  auth_state = await user.get_auth_state()
+                  auth_state = await user.get_auth_state() or {}
                   print("PRE SPAWN START - auth_state")
                   pprint.pprint(auth_state)
-                  if not auth_state:
-                      # user has no auth state
-                      return False
-                  
-                  # define token environment variable from auth_state
-                  spawner.environment['RUCIO_ACCESS_TOKEN'] = self.exchange_token(auth_state['access_token'])
-                  spawner.environment['EOS_ACCESS_TOKEN'] = auth_state['access_token']
-          
-          # set the above authenticator as the default
+                  try:
+                      access = auth_state.get('access_token')
+                      if access:
+                          spawner.environment['RUCIO_ACCESS_TOKEN'] = self.exchange_token(access)
+                          spawner.environment['EOS_ACCESS_TOKEN'] = access
+                  except Exception as e:
+                      print(f"Rucio token injection error: {e}")
+
+                  try:
+                      import json
+                      tokens_dir = os.environ.get('ZENODO_TOKENS_DIR', '/srv/jupyterhub/zenodo-tokens')
+                      token_path = os.path.join(tokens_dir, f"{user.name}.json")
+                      zen_token = None
+                      if os.path.exists(token_path):
+                          with open(token_path) as f:
+                              data = json.load(f)
+                              zen_token = data.get('access_token')
+                              if 'sandbox' in data:
+                                  spawner.environment['ZENODO_SANDBOX'] = str(data.get('sandbox')).lower()
+                      if not zen_token and isinstance(auth_state, dict):
+                          zen = auth_state.get('zenodo', {})
+                          zen_token = zen.get('access_token')
+                      if zen_token:
+                          spawner.environment['ZENODO_API_KEY'] = zen_token
+                          spawner.environment.setdefault('ZENODO_SANDBOX', os.environ.get('ZENODO_SANDBOX', 'true'))
+                  except Exception as e:
+                      print(f"ZENODO token injection error: {e}")
+
           c.JupyterHub.authenticator_class = RucioAuthenticator
 
           crypt_key = os.getenv("JUPYTERHUB_CRYPT_KEY")
           if crypt_key:
               c.CryptKeeper.keys = [crypt_key]
           else:
-            warnings.warn(
-              "Need JUPYTERHUB_CRYPT_KEY env for persistent auth_state.\n"
-              "    export JUPYTERHUB_CRYPT_KEY=$(openssl rand -hex 32)"
-          )
-          c.CryptKeeper.keys = [os.urandom(32)]
+              warnings.warn(
+                  "Need JUPYTERHUB_CRYPT_KEY env for persistent auth_state.\n"
+                  "    export JUPYTERHUB_CRYPT_KEY=$(openssl rand -hex 32)"
+              )
+              c.CryptKeeper.keys = [os.urandom(32)]
 
           # enable authentication state
           c.GenericOAuthenticator.enable_auth_state = True
-        
+
     singleuser:
       defaultUrl: "/lab"
       # The liefcycle hooks are used to create the Rucio configuration file,
@@ -210,6 +312,10 @@ spec:
           description: "quay.io/jupyter/scipy-notebook:python-3.10.11 image"
           kubespawner_override:
             image: jupyter/scipy-notebook:python-3.10.11
+        - display_name: "Zenodo Jupyterlab dev env"
+          description: "All in the tittle"
+          kubespawner_override:
+            image: ghcr.io/vre-hub/zenodo-jupyterlab-extension:refactor_extension
         # - display_name: "VRE and rucio extension integration"
         #   description: "python3.11 and Rucio extension integration "
         #   kubespawner_override:
@@ -261,9 +367,10 @@ spec:
       annotations:
         cert-manager.io/cluster-issuer: "letsencrypt" # this issues a certificate for the domain through cert-manager automatically
       hosts:
-        - jhub-vre-dev.cern.ch 
+        - jhub-vre-dev.cern.ch
       tls:
         - hosts:
             - jhub-vre-dev.cern.ch
           secretName: cert-manager-tls-ingress-secret-jhub-dev
-               
+
+
