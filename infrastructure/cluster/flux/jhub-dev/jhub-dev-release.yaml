@@ -5,7 +5,7 @@ metadata:
   namespace: jhub-dev
 spec:
   releaseName: jhub-dev
-  interval: 5m
+  interval: 1m
   chart:
     spec:
       sourceRef:
@@ -13,7 +13,7 @@ spec:
         name: jhub-dev
         namespace: jhub-dev
       chart: jupyterhub
-      interval: 5m
+      interval: 1m
       version: 3.3.7
   valuesFrom:
     - kind: Secret
@@ -43,8 +43,7 @@ spec:
   values:
     proxy:
       service:
-        type: ClusterIP
-    hub:
+        
       service:
         type: ClusterIP
       networkPolicy:
@@ -75,7 +74,8 @@ spec:
             - email
       services:
         zenodo-auth:
-          url: http://127.0.0.1:9995
+          # Use the hub service DNS so the proxy (separate pod) can reach the managed service
+          url: http://jhub-dev-hub:9995
           command:
             - bash
             - -lc
@@ -159,9 +159,11 @@ spec:
               if __name__ == "__main__":
                   app = make_app()
                   server = httpserver.HTTPServer(app)
-                  server.listen(9995, address='127.0.0.1')
+                  # Listen on all interfaces so the proxy pod can reach the service
+                  server.listen(9995, address='0.0.0.0')
                   ioloop.IOLoop.current().start()
               PY
+
           environment:
             ZENODO_TOKENS_DIR: /srv/jupyterhub/zenodo-tokens
 
@@ -315,7 +317,7 @@ spec:
         - display_name: "Zenodo Jupyterlab dev env"
           description: "All in the tittle"
           kubespawner_override:
-            image: ghcr.io/vre-hub/zenodo-jupyterlab-extension:refactor_extension
+            image: ghcr.io/vre-hub/zenodo-jghcr.io/vre-hub/zenodo-jupyterlab-extension:refactor_extension
         # - display_name: "VRE and rucio extension integration"
         #   description: "python3.11 and Rucio extension integration "
         #   kubespawner_override:
