@@ -309,10 +309,6 @@ spec:
           description: "quay.io/jupyter/scipy-notebook:python-3.11 image"
           kubespawner_override:
             image: quay.io/jupyter/scipy-notebook:python-3.11.10
-        - display_name: "Python 3.10 environment"
-          description: "quay.io/jupyter/scipy-notebook:python-3.10.11 image"
-          kubespawner_override:
-            image: jupyter/scipy-notebook:python-3.10.11
         - display_name: "Zenodo Jupyterlab dev env"
           description: "All in the tittle"
           kubespawner_override:
