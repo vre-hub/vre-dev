@@ -43,9 +43,8 @@ spec:
   values:
     proxy:
       service:
-        
-      service:
         type: ClusterIP
+    hub:
       networkPolicy:
         enabled: false
       db:
