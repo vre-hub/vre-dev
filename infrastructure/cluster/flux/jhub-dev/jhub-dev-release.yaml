@@ -147,7 +147,7 @@ spec:
 
           # enable authentication state
           c.GenericOAuthenticator.enable_auth_state = True
-        # Here inden
+
         zenodo-oauth: |
           import os, json, time, pathlib, secrets, requests
           from urllib.parse import urlencode
@@ -162,6 +162,12 @@ spec:
           TOKENS_DIR = os.environ.get('ZENODO_TOKENS_DIR', '/srv/jupyterhub/zenodo-tokens')
 
           class ZenodoLoginHandler(BaseHandler):
+            def _callback_url(self):
+              # Build absolute URL (scheme + host + path) to match Zenodo's registered redirect URI exactly
+              proto = getattr(self.request, 'protocol', 'https')
+              host = self.request.host
+              return f"{proto}://{host}{url_path_join(self.base_url, 'zenodo', 'callback')}"
+
             async def get(self):
               user = self.current_user
               if not user:
@@ -178,10 +184,6 @@ spec:
               }
               self.redirect(f"{ZENODO_AUTHORIZE_URL}?{urlencode(params)}")
 
-          def _callback_url(self):
-            # base_url already ends with /hub/
-            return url_path_join(self.base_url, 'zenodo-auth', 'callback')
-
           class ZenodoCallbackHandler(BaseHandler):
             async def get(self):
               user = self.current_user
@@ -192,7 +194,7 @@ spec:
               if not state_cookie or state_cookie.decode() != state_param:
                 raise web.HTTPError(400, 'Invalid state')
               code = self.get_argument('code', '')
-              callback_url = ZenodoLoginHandler._callback_url(self)  # reuse logic
+              callback_url = ZenodoLoginHandler._callback_url(self)
               data = {
                 'grant_type': 'authorization_code',
                 'code': code,
@@ -216,10 +218,10 @@ spec:
               self.clear_cookie('zen_state')
               self.redirect(url_path_join(self.base_url, 'home'))
 
-          # Register handlers using (deprecated but functional) extra_handlers
+          # Register handlers using extra_handlers (deprecated but fucntional)
           c.JupyterHub.extra_handlers = [
-            (r'/zenodo-auth/login', ZenodoLoginHandler),
-            (r'/zenodo-auth/callback', ZenodoCallbackHandler),
+            (r'/zenodo/login', ZenodoLoginHandler),
+            (r'/zenodo/callback', ZenodoCallbackHandler),
           ]
 
     singleuser:
@@ -289,10 +291,10 @@ spec:
           description: "quay.io/jupyter/scipy-notebook:python-3.11 image"
           kubespawner_override:
             image: quay.io/jupyter/scipy-notebook:python-3.11.10
-        - display_name: "Zenodo Jupyterlab dev env"
+        - display_name: "Zenodo Jupyterlab extension DEV env"
           description: "All in the tittle"
           kubespawner_override:
-            image: ghcr.io/vre-hub/zenodo-jupyterlab-extension:refactor_extension
+            image: ghcr.io/vre-hub/zenodo-jupyterlab-extension:dev-oauth
         # - display_name: "VRE and rucio extension integration"
         #   description: "python3.11 and Rucio extension integration "
         #   kubespawner_override:
