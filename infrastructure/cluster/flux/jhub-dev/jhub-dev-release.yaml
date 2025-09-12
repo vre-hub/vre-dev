@@ -316,7 +316,7 @@ spec:
         - display_name: "Zenodo Jupyterlab dev env"
           description: "All in the tittle"
           kubespawner_override:
-            image: ghcr.io/vre-hub/zenodo-jghcr.io/vre-hub/zenodo-jupyterlab-extension:refactor_extension
+            image: ghcr.io/vre-hub/zenodo-jupyterlab-extension:refactor_extension
         # - display_name: "VRE and rucio extension integration"
         #   description: "python3.11 and Rucio extension integration "
         #   kubespawner_override:
